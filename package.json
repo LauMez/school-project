@@ -1,0 +1,36 @@
+{
+  "name": "school-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LauMez/school-project.git"
+  },
+  "keywords": [
+    "nodejs",
+    "html",
+    "css"
+  ],
+  "author": "Lautaro Martinez, LauMez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LauMez/school-project/issues"
+  },
+  "homepage": "https://github.com/LauMez/school-project#readme",
+  "dependencies": {
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^8.57.0",
+    "globals": "^15.0.0",
+    "standard": "^17.1.0"
+  },
+  "eslintConfig": {
+    "extends": "standard"
+  }
+}
