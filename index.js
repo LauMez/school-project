@@ -1,7 +1,7 @@
-const http = require('node:http');
-const { findAvailablePort } = require('./free-port.js');
+import { createServer } from 'node:http';
+import { findAvailablePort } from './free-port.js';
 
-const server = http.createServer((req, res) => {
+const server = createServer((req, res) => {
     console.log('request received');
     res.end('Hola mundo');
 });
