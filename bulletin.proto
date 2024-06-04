@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package bulletinservice;
+
+service BulletinService {
+  rpc GetBulletin (GetBulletinRequest) returns (GetBulletinResponse) {}
+}
+
+message GetBulletinRequest {
+  int32 CUIL = 1;
+}
+
+message GetBulletinResponse {
+  int32 firstAdvanceNote = 1;
+  string firstPeriodNote = 2;
+  string secondAdvanceNote = 3;
+  string secondPeriodNote = 4;
+}

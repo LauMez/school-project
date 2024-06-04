@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Probar API Rest</title>
+  <style>
+    article {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    img {
+      height: auto;
+      width: 320px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <p>hola</p>
+  <main></main>
+
+  <% if(students.length > 1 ) { %>
+    <% students.forEach(student => { %>
+      <article>
+        <h2><%=student.CUIL%></h2>
+        <p>Nombre: <%=student.first_name%></p>
+        <p>Segundo nombre: <%=student.second_name%></p>
+        <p>Apellido1: <%=student.last_name1%></p>
+        <p>Apellido2: <%=student.last_name2%></p>
+        <p>Numero telefono: <%=student.phone_number%></p>
+        <p>Direccion: <%=student.direction%></p>
+  
+        <button>Eliminar</button>
+      </article>
+    <% }) %>
+  <%} else {%>
+    <article>
+      <h2><%=students.CUIL%></h2>
+      <p>Nombre: <%=students.first_name%></p>
+      <p>Segundo nombre: <%=students.second_name%></p>
+      <p>Apellido1: <%=students.last_name1%></p>
+      <p>Apellido2: <%=students.last_name2%></p>
+      <p>Numero telefono: <%=students.phone_number%></p>
+      <p>Direccion: <%=students.direction%></p>
+
+      <button>Eliminar</button>
+    </article>
+  <%}%>
+</body>
+</html>

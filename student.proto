@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package studentservice;
+
+service StudentService {
+  rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {}
+  rpc GetStudent (GetStudentRequest) returns (GetStudentResponse) {}
+}
+
+message GetStudentRequest {
+  int32 CUIL = 1;
+}
+
+message GetStudentResponse {
+  int32 CUIL = 1;
+  string first_name = 2;
+  string second_name = 3;
+  string last_name1 = 4;
+  string last_name2 = 5;
+  string phone_number = 6;
+  string direction = 7;
+}
+
+message GetAllRequest {}
+
+message GetAllResponse {
+  int32 CUIL = 1;
+  string first_name = 2;
+  string second_name = 3;
+  string last_name1 = 4;
+  string last_name2 = 5;
+  string phone_number = 6;
+  string direction = 7;
+}
