@@ -11,6 +11,7 @@ CREATE TABLE Bulletin (
 CREATE TABLE Period (
     periodID INT PRIMARY KEY,
     subjectID INT,
+    bulletinID INT,
     init_date DATE,
     due_date DATE/*,
     FOREIGN KEY(subjectID) REFERENCES Subject(subjectID)*/
@@ -19,7 +20,6 @@ CREATE TABLE Period (
 CREATE TABLE First_Period (
     periodID INT,
     first_periodID INT PRIMARY KEY,
-    bulletinID INT,
     observations VARCHAR(255),
     FOREIGN KEY(periodID) REFERENCES Period(periodID),
     FOREIGN KEY(bulletinID) REFERENCES Bulletin(bulletinID)
@@ -28,7 +28,6 @@ CREATE TABLE First_Period (
 CREATE TABLE Second_Period (
     periodID INT,
     second_periodID INT PRIMARY KEY,
-    bulletinID INT,
     observations VARCHAR(255),
     FOREIGN KEY(periodID) REFERENCES Period(periodID),
     FOREIGN KEY(bulletinID) REFERENCES Bulletin(bulletinID)
@@ -37,7 +36,6 @@ CREATE TABLE Second_Period (
 CREATE TABLE First_Advance (
     periodID INT,
     first_advanceID INT PRIMARY KEY,
-    bulletinID INT,
     FOREIGN KEY(periodID) REFERENCES Period(periodID),
     FOREIGN KEY(bulletinID) REFERENCES Bulletin(bulletinID)
 );
@@ -45,7 +43,6 @@ CREATE TABLE First_Advance (
 CREATE TABLE Second_Advance (
     periodID INT,
     second_advanceID INT PRIMARY KEY,
-    bulletinID INT,
     FOREIGN KEY(periodID) REFERENCES Period(periodID),
     FOREIGN KEY(bulletinID) REFERENCES Bulletin(bulletinID)
 );
@@ -108,7 +105,7 @@ CREATE TABLE Final_Report (
 );
 
 INSERT INTO Bulletin (bulletinID, CUIL)
-VALUES (100, 856984218);
+VALUES (100, 123456789);
 INSERT INTO Period (periodID, subjectID, init_date, due_date)
 VALUES (001, 2, 01-01-2024, 31-03-2024);
 INSERT INTO First_Period (periodID, first_periodID, bulletinID, observations)

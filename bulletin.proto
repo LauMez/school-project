@@ -11,7 +11,7 @@ message GetBulletinRequest {
 }
 
 message GetBulletinResponse {
-  int32 firstAdvanceNote = 1;
+  string firstAdvanceNote = 1;
   string firstPeriodNote = 2;
   string secondAdvanceNote = 3;
   string secondPeriodNote = 4;

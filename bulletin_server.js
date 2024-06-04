@@ -32,69 +32,54 @@ db.connect(err => {
 server.addService(bulletinservice.BulletinService.service, {
     GetBulletin: (call, callback) => {
     const { CUIL } = call.request;
-    db.query('SELECT bulletinID FROM Bulletin WHERE CUIL = ?', [CUIL], (err, bulletin) => {
-        const bulletinID = bulletin[0].bulletinID
-        console.log('BulletinID: ', bulletinID);
-        if (!bulletinID) {
-            callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-        } 
-        // else {
-        //     callback(null, {details: 'Nashe'});
-        // }
-        db.query('SELECT periodID FROM First_Advance WHERE bulletinID = ?', [bulletinID], (err, firstAdvance) => {
-            const periodID = firstAdvance[0].periodID
-            console.log('PeriodID: ', periodID)
-            if (!periodID) {
-                callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-            }
 
-            db.query('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [periodID], (err, FAPedagogicalAssessment) => {
-                const assessmentID = FAPedagogicalAssessment[0].assessmentID
-                console.log('AssessmentID: ', assessmentID)
-                if (!assessmentID) {
-                    callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-                }
+    (async () => {
+        try {
+            const [bulletin] = await db.promise().execute('SELECT bulletinID FROM Bulletin WHERE CUIL = ?', [CUIL]);
+            const bulletinID = bulletin[0].bulletinID
 
-                db.query('SELECT qualification FROM Assessment WHERE assessmentID = ?', [assessmentID], (err, FAAssessment) => {
-                    const firstAdvanceNote = FAAssessment[0].qualification
-                    console.log('Firs Advance Note: ', firstAdvanceNote)
-                    if (!firstAdvanceNote) {
-                        callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-                    }
+            const [firstAdvance] = await db.promise().execute('SELECT periodID FROM First_Advance WHERE bulletinID = ?', [bulletinID])
+            const FAperiodID = firstAdvance[0].periodID
+            
+            const [FApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FAperiodID])
+            const FAassessmentID = FApedagogicalAssessment[0].assessmentID
 
-                    //Error aca
-                    callback(null, {firstAdvanceNote: firstAdvanceNote});
-                })
-            })
-        })
+            const [FAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FAassessmentID])
+            const FirstAdvanceNote = FAassessment[0].qualification
 
-        db.query('SELECT periodID FROM First_Period WHERE bulletinID = ?', [bulletinID], (err, firstPeriod) => {
-            const periodID = firstPeriod[0].periodID
-            console.log('PeriodID: ', periodID)
-            if (!periodID) {
-                callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-            }
+            const [firstPeriod] = await db.promise().execute('SELECT periodID FROM First_Period WHERE bulletinID = ?', [bulletinID])
+            const FPperiodID = firstPeriod[0].periodID
+            
+            const [FPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FPperiodID])
+            const FPassessmentID = FPpedagogicalAssessment[0].assessmentID
 
-            db.query('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [periodID], (err, FPPedagogicalAssessment) => {
-                const assessmentID = FPPedagogicalAssessment[0].assessmentID
-                console.log('AssessmentID: ', assessmentID)
-                if (!assessmentID) {
-                    callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-                }
+            const [FPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FPassessmentID])
+            const FirstPeriodNote = FPassessment[0].qualification
+            
+            const [secondAdvance] = await db.promise().execute('SELECT periodID FROM Second_Advance WHERE bulletinID = ?', [bulletinID])
+            const SAperiodID = secondAdvance[0].periodID
+            
+            const [SApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SAperiodID])
+            const SAassessmentID = SApedagogicalAssessment[0].assessmentID
 
-                db.query('SELECT qualification FROM Assessment WHERE assessmentID = ?', [assessmentID], (err, FPAssessment) => {
-                    const firstPeriodNote = FPAssessment[0].qualification
-                    console.log('Firs Period Note: ', firstPeriodNote)
-                    if (!firstPeriodNote) {
-                        callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-                    }
+            const [SAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SAassessmentID])
+            const SecondAdvanceNote = SAassessment[0].qualification
 
-                    callback(null, {firstPeriodNote: firstPeriodNote});
-                })
-            })
-        })
-    });
-      
+            const [secondPeriod] = await db.promise().execute('SELECT periodID FROM Second_Period WHERE bulletinID = ?', [bulletinID])
+            const SPperiodID = secondPeriod[0].periodID
+            
+            const [SPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SPperiodID])
+            const SPassessmentID = SPpedagogicalAssessment[0].assessmentID
+
+            const [SPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SPassessmentID])
+            const SecondPeriodNote = SPassessment[0].qualification
+            
+            callback(null, { firstAdvanceNote: FirstAdvanceNote, firstPeriodNote: FirstPeriodNote, secondAdvanceNote: SecondAdvanceNote, secondPeriodNote: SecondPeriodNote });
+        } catch (error) {
+            console.error('Error al ejecutar la consulta:', error);
+            callback(error, null);
+        }
+    })()
       
     //   if (row) {
     //     callback(null, {details: 'Nashe'});
