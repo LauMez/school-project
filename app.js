@@ -1,6 +1,7 @@
 import express, { json } from 'express'
 // import { createStudentRouter } from './routes/student.js'
-import { createBulletinRouter } from './routes/bulletin.js'
+// import { createBulletinRouter } from './routes/bulletin.js'
+import { createCourseRouter } from './routes/course.js'
 import { corsMiddleware } from './middlewares/cors.js'
 import 'dotenv/config'
 import path from 'node:path'
@@ -8,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 import axios from 'axios'
 
 // después
-export const createApp = ({ studentModel, bulletinModel }) => {
+export const createApp = ({ courseModel }) => {
   const app = express()
   app.use(json())
   app.use(corsMiddleware())
@@ -21,7 +22,8 @@ export const createApp = ({ studentModel, bulletinModel }) => {
   app.set('view engine', 'ejs');
 
   // app.use('/student', createStudentRouter({ studentModel }))
-  app.use('/bulletin', createBulletinRouter({ bulletinModel }))
+  // app.use('/bulletin', createBulletinRouter({ bulletinModel }))
+  app.use('/course', createCourseRouter({ courseModel }))
 
   // app.get('/', async (req, res) => {
   //   const response = await axios.get('http://localhost:1234/student')

@@ -10,7 +10,7 @@ const DEFAULT_CONFIG = {
 }
 const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG
 
-const packageDefinition = protoLoader.loadSync('bulletin.proto', {
+const packageDefinition = protoLoader.loadSync('../protos/bulletin.proto', {
   keepCase: true,
   longs: String,
   enums: String,

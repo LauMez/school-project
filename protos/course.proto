@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package courseservice;
+
+service CourseService {
+  rpc GetCourse (GetCourseRequest) returns (GetCourseResponse) {}
+}
+
+message GetCourseRequest {
+  int32 CUIL = 1;
+}
+
+message GetCourseResponse {
+  int32 year = 1;
+  int32 division = 2;
+  string group = 3;
+}
