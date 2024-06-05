@@ -53,7 +53,7 @@ server.addService(studentservice.StudentService.service, {
   }
 });
 
-const port = '50051';
+const port = '50052';
 server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), () => {
   console.log(`Item service running at http://0.0.0.0:${port}`);
 });

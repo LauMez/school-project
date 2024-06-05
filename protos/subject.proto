@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package subjectservice;
+
+service SubjectService {
+    rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {} 
+    rpc GetByID (GetRequest) returns (GetResponse) {}
+}
+
+message GetAllRequest {}
+
+message GetAllResponse {
+    string name = 1;
+    string day = 2;
+    string schedule = 3;
+}
+
+message GetRequest {
+    int32 subjectID = 1;
+}
+
+message GetResponse {
+    string name = 1;
+    string day = 2;
+    string schedule = 3;
+}

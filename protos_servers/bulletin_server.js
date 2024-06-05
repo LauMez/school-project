@@ -35,44 +35,67 @@ server.addService(bulletinservice.BulletinService.service, {
 
     (async () => {
         try {
-            const [bulletin] = await db.promise().execute('SELECT bulletinID FROM Bulletin WHERE CUIL = ?', [CUIL]);
-            const bulletinID = bulletin[0].bulletinID
+            // const [bulletin] = await db.promise().execute('SELECT bulletinID FROM Bulletin WHERE CUIL = ?', [CUIL]);
+            // const bulletinID = bulletin[0].bulletinID
+            // console.log(bulletinID)
+            db.query('SELECT periodID FROM Period WHERE bulletinID = ?', [CUIL], async (err, periods) => {
+              try {
+                const promises = periods.map(async (period) => {
+                    const [period] = await db.promise().execute('SELECT ')
+                    const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID])
+                    
+                    const [assessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [pedagogicalAssessment[0].assessmentID])
+                    return {
+                        name: subject.name,
+                        day: subjectSchedule[0].day,
+                        schedule: subjectSchedule[0].schedule
+                    };
+                });
+  
+                const periodObjects = await Promise.all(promises);
+                periodObjects.forEach(periodObject => call.write(periodObject));
+                call.end();
+              } catch (error) {
+                  console.error('Error processing subjects:', error);
+                  callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+              }
+            });
 
-            const [firstAdvance] = await db.promise().execute('SELECT periodID FROM First_Advance WHERE bulletinID = ?', [bulletinID])
-            const FAperiodID = firstAdvance[0].periodID
+            // const [firstAdvance] = await db.promise().execute('SELECT periodID FROM First_Advance WHERE bulletinID = ?', [bulletinID])
+            // const FAperiodID = firstAdvance[0].periodID
             
-            const [FApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FAperiodID])
-            const FAassessmentID = FApedagogicalAssessment[0].assessmentID
+            // const [FApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FAperiodID])
+            // const FAassessmentID = FApedagogicalAssessment[0].assessmentID
 
-            const [FAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FAassessmentID])
-            const FirstAdvanceNote = FAassessment[0].qualification
+            // const [FAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FAassessmentID])
+            // const FirstAdvanceNote = FAassessment[0].qualification
 
-            const [firstPeriod] = await db.promise().execute('SELECT periodID FROM First_Period WHERE bulletinID = ?', [bulletinID])
-            const FPperiodID = firstPeriod[0].periodID
+            // const [firstPeriod] = await db.promise().execute('SELECT periodID FROM First_Period WHERE bulletinID = ?', [bulletinID])
+            // const FPperiodID = firstPeriod[0].periodID
             
-            const [FPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FPperiodID])
-            const FPassessmentID = FPpedagogicalAssessment[0].assessmentID
+            // const [FPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FPperiodID])
+            // const FPassessmentID = FPpedagogicalAssessment[0].assessmentID
 
-            const [FPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FPassessmentID])
-            const FirstPeriodNote = FPassessment[0].qualification
+            // const [FPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FPassessmentID])
+            // const FirstPeriodNote = FPassessment[0].qualification
             
-            const [secondAdvance] = await db.promise().execute('SELECT periodID FROM Second_Advance WHERE bulletinID = ?', [bulletinID])
-            const SAperiodID = secondAdvance[0].periodID
+            // const [secondAdvance] = await db.promise().execute('SELECT periodID FROM Second_Advance WHERE bulletinID = ?', [bulletinID])
+            // const SAperiodID = secondAdvance[0].periodID
             
-            const [SApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SAperiodID])
-            const SAassessmentID = SApedagogicalAssessment[0].assessmentID
+            // const [SApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SAperiodID])
+            // const SAassessmentID = SApedagogicalAssessment[0].assessmentID
 
-            const [SAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SAassessmentID])
-            const SecondAdvanceNote = SAassessment[0].qualification
+            // const [SAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SAassessmentID])
+            // const SecondAdvanceNote = SAassessment[0].qualification
 
-            const [secondPeriod] = await db.promise().execute('SELECT periodID FROM Second_Period WHERE bulletinID = ?', [bulletinID])
-            const SPperiodID = secondPeriod[0].periodID
+            // const [secondPeriod] = await db.promise().execute('SELECT periodID FROM Second_Period WHERE bulletinID = ?', [bulletinID])
+            // const SPperiodID = secondPeriod[0].periodID
             
-            const [SPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SPperiodID])
-            const SPassessmentID = SPpedagogicalAssessment[0].assessmentID
+            // const [SPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SPperiodID])
+            // const SPassessmentID = SPpedagogicalAssessment[0].assessmentID
 
-            const [SPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SPassessmentID])
-            const SecondPeriodNote = SPassessment[0].qualification
+            // const [SPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SPassessmentID])
+            // const SecondPeriodNote = SPassessment[0].qualification
             
             callback(null, { firstAdvanceNote: FirstAdvanceNote, firstPeriodNote: FirstPeriodNote, secondAdvanceNote: SecondAdvanceNote, secondPeriodNote: SecondPeriodNote });
         } catch (error) {
@@ -89,7 +112,7 @@ server.addService(bulletinservice.BulletinService.service, {
   }
 });
 
-const port = '50051';
+const port = '50054';
 server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), () => {
   console.log(`Item service running at http://0.0.0.0:${port}`);
 });

@@ -1,7 +1,7 @@
 import grpc from '@grpc/grpc-js'
 import protoLoader from '@grpc/proto-loader'
 
-const packageDefinition = protoLoader.loadSync('bulletin.proto', {
+const packageDefinition = protoLoader.loadSync('protos/bulletin.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -10,7 +10,7 @@ const packageDefinition = protoLoader.loadSync('bulletin.proto', {
 });
 const bulletinservice = grpc.loadPackageDefinition(packageDefinition).bulletinservice;
 
-const bulletinClient = new bulletinservice.BulletinService('localhost:50051', grpc.credentials.createInsecure());
+const bulletinClient = new bulletinservice.BulletinService('localhost:50054', grpc.credentials.createInsecure());
 
 export class BulletinModel {
     static async getBulletin ({ CUIL }) {

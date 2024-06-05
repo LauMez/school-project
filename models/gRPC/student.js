@@ -2,7 +2,7 @@
 import grpc from '@grpc/grpc-js'
 import protoLoader from '@grpc/proto-loader'
 
-const packageDefinition = protoLoader.loadSync('student.proto', {
+const packageDefinition = protoLoader.loadSync('protos/student.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -11,7 +11,7 @@ const packageDefinition = protoLoader.loadSync('student.proto', {
 });
 const studentservice = grpc.loadPackageDefinition(packageDefinition).studentservice;
 
-const studentClient = new studentservice.StudentService('localhost:50051', grpc.credentials.createInsecure());
+const studentClient = new studentservice.StudentService('localhost:50052', grpc.credentials.createInsecure());
 
 export class StudentModel {
   static async getAll () {

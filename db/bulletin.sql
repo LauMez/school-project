@@ -22,6 +22,7 @@ CREATE TABLE Period (
 CREATE TABLE First_Period (
     periodID INT,
     first_periodID INT PRIMARY KEY,
+    periodName VARCHAR(30) DEFAULT 'firstPeriod',
     observations VARCHAR(255),
     FOREIGN KEY(periodID) REFERENCES Period(periodID)
 );
@@ -29,6 +30,7 @@ CREATE TABLE First_Period (
 CREATE TABLE Second_Period (
     periodID INT,
     second_periodID INT PRIMARY KEY,
+    periodName VARCHAR(30) DEFAULT 'secondPeriod',
     observations VARCHAR(255),
     FOREIGN KEY(periodID) REFERENCES Period(periodID)
 );
@@ -36,12 +38,14 @@ CREATE TABLE Second_Period (
 CREATE TABLE First_Advance (
     periodID INT,
     first_advanceID INT PRIMARY KEY,
+    periodName VARCHAR(30) DEFAULT 'firstAdvance',
     FOREIGN KEY(periodID) REFERENCES Period(periodID)
 );
 
 CREATE TABLE Second_Advance (
     periodID INT,
     second_advanceID INT PRIMARY KEY,
+    periodName VARCHAR(30) DEFAULT 'secondAdvance',
     FOREIGN KEY(periodID) REFERENCES Period(periodID)
 );
 

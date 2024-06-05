@@ -10,7 +10,7 @@ const packageDefinition = protoLoader.loadSync('protos/course.proto', {
 });
 const courseservice = grpc.loadPackageDefinition(packageDefinition).courseservice;
 
-const courseClient = new courseservice.CourseService('localhost:50051', grpc.credentials.createInsecure());
+const courseClient = new courseservice.CourseService('localhost:50053', grpc.credentials.createInsecure());
 
 export class CourseModel {
     static async getCourse ({ CUIL }) {

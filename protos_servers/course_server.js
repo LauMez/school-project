@@ -54,7 +54,7 @@ server.addService(courseservice.CourseService.service, {
     }
 });
 
-const port = '50051';
+const port = '50053';
 server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), () => {
   console.log(`Item service running at http://0.0.0.0:${port}`);
 });
