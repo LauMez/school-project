@@ -4,14 +4,12 @@ package studentservice;
 
 service StudentService {
   rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {}
-  rpc GetStudent (GetStudentRequest) returns (GetStudentResponse) {}
+  rpc GetByID (GetByIDRequest) returns (GetByIDResponse) {}
 }
 
-message GetStudentRequest {
-  int32 CUIL = 1;
-}
+message GetAllRequest {}
 
-message GetStudentResponse {
+message GetAllResponse {
   int32 CUIL = 1;
   string first_name = 2;
   string second_name = 3;
@@ -21,9 +19,11 @@ message GetStudentResponse {
   string direction = 7;
 }
 
-message GetAllRequest {}
+message GetByIDRequest {
+  int32 CUIL = 1;
+}
 
-message GetAllResponse {
+message GetByIDResponse {
   int32 CUIL = 1;
   string first_name = 2;
   string second_name = 3;

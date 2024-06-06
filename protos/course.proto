@@ -3,15 +3,26 @@ syntax = "proto3";
 package courseservice;
 
 service CourseService {
-  rpc GetCourse (GetCourseRequest) returns (GetCourseResponse) {}
+  rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {}
+  rpc GetByID (GetByIDRequest) returns (GetByIDResponse) {}
 }
 
-message GetCourseRequest {
-  int32 CUIL = 1;
-}
+message GetAllRequest {}
 
-message GetCourseResponse {
+message GetAllResponse {
   int32 year = 1;
   int32 division = 2;
-  string group = 3;
+  string groupA = 3;
+  string groupB = 4;
+}
+
+message GetByIDRequest {
+  int32 courseID = 1;
+}
+
+message GetByIDResponse {
+  int32 year = 1;
+  int32 division = 2;
+  string groupA = 3;
+  string groupB = 4;
 }

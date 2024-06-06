@@ -6,10 +6,10 @@ export const createBulletinRouter = ({ bulletinModel }) => {
 
   const bulletinController = new BulletinController({ bulletinModel })
 
-//   bulletinRouter.get('/', bulletinController.getBulletin)
+  bulletinRouter.get('/', bulletinController.getAll)
 //   bulletinRouter.post('/', bulletinController.create)
 
-  bulletinRouter.get('/:CUIL', bulletinController.getBulletin)
+  bulletinRouter.get('/:bulletinID', bulletinController.getByID)
 //   bulletinRouter.delete('/:id', bulletinController.delete)
 //   bulletinRouter.patch('/:id', bulletinController.update)
 

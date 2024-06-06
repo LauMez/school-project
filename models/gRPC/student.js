@@ -31,9 +31,9 @@ export class StudentModel {
   });
   }
 
-  static async getById ({ CUIL }) {
+  static async getByID ({ CUIL }) {
     return new Promise((resolve, reject) => {
-      studentClient.GetStudent({ CUIL }, (error, response) => {
+      studentClient.GetByID({ CUIL }, (error, response) => {
           if (error) {
               reject(error);
           } else {

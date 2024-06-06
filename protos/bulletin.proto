@@ -3,16 +3,26 @@ syntax = "proto3";
 package bulletinservice;
 
 service BulletinService {
-  rpc GetBulletin (GetBulletinRequest) returns (GetBulletinResponse) {}
+  rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {}
+  rpc GetByID (GetByIDRequest) returns (GetByIDResponse) {}
 }
 
-message GetBulletinRequest {
-  int32 CUIL = 1;
+message GetAllRequest {}
+
+message GetAllResponse {
+  string firstAdvanceNote = 1;
+  string firstPeriodNote = 2;
+  string secondAdvanceNote = 3;
+  string secondPeriodNote = 4;
 }
 
-message GetBulletinResponse {
-  string firstAdvanCE = 1;
-  string firstPeriod = 2;
-  string secondAdvance = 3;
-  string secondPeriod = 4;
+message GetByIDRequest {
+  int32 bulletinID = 1;
+}
+
+message GetByIDResponse {
+  string firstAdvanceNote = 1;
+  string firstPeriodNote = 2;
+  string secondAdvanceNote = 3;
+  string secondPeriodNote = 4;
 }

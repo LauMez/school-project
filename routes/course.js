@@ -6,12 +6,8 @@ export const createCourseRouter = ({ courseModel }) => {
 
   const courseController = new CourseController({ courseModel })
 
-//   bulletinRouter.get('/', bulletinController.getBulletin)
-//   bulletinRouter.post('/', bulletinController.create)
-
-  courseRouter.get('/:CUIL', courseController.getCourse)
-//   bulletinRouter.delete('/:id', bulletinController.delete)
-//   bulletinRouter.patch('/:id', bulletinController.update)
+  courseRouter.get('/', courseController.getAll)
+  courseRouter.get('/:courseID', courseController.getByID)
 
   return courseRouter
 }

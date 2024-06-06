@@ -30,85 +30,85 @@ db.connect(err => {
   console.log('Connected to database.');
 });
 server.addService(bulletinservice.BulletinService.service, {
-    GetBulletin: (call, callback) => {
-    const { CUIL } = call.request;
+  GetAll: async (call, callback) => {
+    try {
+      const bulletins = await new Promise((resolve, reject) => {
+        db.query('SELECT bulletinID FROM Bulletin', (err, bulletins) => {
+          if (err) reject(err);
+          resolve(bulletins);
+        });
+      });
 
-    (async () => {
+      const bulletinPromises = bulletins.map(async (bulletin) => {
         try {
-            // const [bulletin] = await db.promise().execute('SELECT bulletinID FROM Bulletin WHERE CUIL = ?', [CUIL]);
-            // const bulletinID = bulletin[0].bulletinID
-            // console.log(bulletinID)
-            db.query('SELECT periodID FROM Period WHERE bulletinID = ?', [CUIL], async (err, periods) => {
-              try {
-                const promises = periods.map(async (period) => {
-                    const [period] = await db.promise().execute('SELECT ')
-                    const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID])
-                    
-                    const [assessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [pedagogicalAssessment[0].assessmentID])
-                    return {
-                        name: subject.name,
-                        day: subjectSchedule[0].day,
-                        schedule: subjectSchedule[0].schedule
-                    };
-                });
-  
-                const periodObjects = await Promise.all(promises);
-                periodObjects.forEach(periodObject => call.write(periodObject));
-                call.end();
-              } catch (error) {
-                  console.error('Error processing subjects:', error);
-                  callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-              }
+          const periods = await new Promise((resolve, reject) => {
+            db.query('SELECT periodID FROM Period WHERE bulletinID = ?', [bulletin.bulletinID], (err, periods) => {
+              if (err) reject(err);
+              resolve(periods);
             });
+          });
 
-            // const [firstAdvance] = await db.promise().execute('SELECT periodID FROM First_Advance WHERE bulletinID = ?', [bulletinID])
-            // const FAperiodID = firstAdvance[0].periodID
-            
-            // const [FApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FAperiodID])
-            // const FAassessmentID = FApedagogicalAssessment[0].assessmentID
+          const periodPromises = periods.map(async (period) => {
+            const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
+            const [assessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [pedagogicalAssessment[0].assessmentID]);
+            return assessment[0].qualification;
+          });
 
-            // const [FAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FAassessmentID])
-            // const FirstAdvanceNote = FAassessment[0].qualification
+          const periodObjects = await Promise.all(periodPromises);
+          const firstAdvance = periodObjects[2];
+          const firstPeriod = periodObjects[0];
+          const secondAdvance = periodObjects[3];
+          const secondPeriod = periodObjects[1];
 
-            // const [firstPeriod] = await db.promise().execute('SELECT periodID FROM First_Period WHERE bulletinID = ?', [bulletinID])
-            // const FPperiodID = firstPeriod[0].periodID
-            
-            // const [FPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [FPperiodID])
-            // const FPassessmentID = FPpedagogicalAssessment[0].assessmentID
-
-            // const [FPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [FPassessmentID])
-            // const FirstPeriodNote = FPassessment[0].qualification
-            
-            // const [secondAdvance] = await db.promise().execute('SELECT periodID FROM Second_Advance WHERE bulletinID = ?', [bulletinID])
-            // const SAperiodID = secondAdvance[0].periodID
-            
-            // const [SApedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SAperiodID])
-            // const SAassessmentID = SApedagogicalAssessment[0].assessmentID
-
-            // const [SAassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SAassessmentID])
-            // const SecondAdvanceNote = SAassessment[0].qualification
-
-            // const [secondPeriod] = await db.promise().execute('SELECT periodID FROM Second_Period WHERE bulletinID = ?', [bulletinID])
-            // const SPperiodID = secondPeriod[0].periodID
-            
-            // const [SPpedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [SPperiodID])
-            // const SPassessmentID = SPpedagogicalAssessment[0].assessmentID
-
-            // const [SPassessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [SPassessmentID])
-            // const SecondPeriodNote = SPassessment[0].qualification
-            
-            callback(null, { firstAdvanceNote: FirstAdvanceNote, firstPeriodNote: FirstPeriodNote, secondAdvanceNote: SecondAdvanceNote, secondPeriodNote: SecondPeriodNote });
+          return {
+            firstAdvanceNote: firstAdvance,
+            firstPeriodNote: firstPeriod,
+            secondAdvanceNote: secondAdvance,
+            secondPeriodNote: secondPeriod
+          };
         } catch (error) {
-            console.error('Error al ejecutar la consulta:', error);
-            callback(error, null);
+          console.error('Error processing periods:', error);
+          callback({ code: grpc.status.INTERNAL, details: "Internal error" });
         }
-    })()
-      
-    //   if (row) {
-    //     callback(null, {details: 'Nashe'});
-    //   } else {
-    //     callback({ code: grpc.status.NOT_FOUND, details: "Bulletin not found" });
-    //   }
+      });
+
+      const bulletinObjects = await Promise.all(bulletinPromises);
+      bulletinObjects.forEach(bulletinObject => call.write(bulletinObject));
+      call.end();
+    } catch (error) {
+      console.error('Error processing bulletins:', error);
+      callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+    }
+  }, 
+  GetByID: async(call, callback) => {
+    const { bulletinID } = call.request;
+
+    try {
+      const periods = await new Promise((resolve, reject) => {
+        db.query('SELECT periodID FROM Period WHERE bulletinID = ?', [bulletinID], (err, bulletins) => {
+          if (err) reject(err);
+          resolve(bulletins);
+        });
+      });
+  
+      const periodPromises = periods.map(async (period) => {
+        const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
+  
+        const [assessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [pedagogicalAssessment[0].assessmentID]);
+  
+        return assessment[0].qualification;
+      })
+  
+      const periodObjects = await Promise.all(periodPromises);
+      const firstAdvance = periodObjects[2];
+      const firstPeriod = periodObjects[0];
+      const secondAdvance = periodObjects[3];
+      const secondPeriod = periodObjects[1];
+  
+      callback(null, { firstAdvanceNote: firstAdvance, firstPeriodNote: firstPeriod, secondAdvanceNote: secondAdvance, secondPeriodNote: secondPeriod });
+    } catch {
+      callback({ code: grpc.status.NOT_FOUND, details: "Bulletin not found" });
+    }
   }
 });
 

@@ -32,14 +32,14 @@ db.connect(err => {
 server.addService(studentservice.StudentService.service, {
   GetAll:(call, callback) => {
     db.query('SELECT * FROM Personal_Information', (err, rows) => {
-      if(err) throw err
+      if(err) callback({ code: grpc.status.INTERNAL, details: "Internal error" });
       for(const data of rows) {
         call.write(data)
       }
       call.end()
     })
   },
-  GetStudent: (call, callback) => {
+  GetByID: (call, callback) => {
     const { CUIL } = call.request;
     db.query('SELECT * FROM Personal_Information WHERE CUIL = ?', [CUIL], (err, row) => {
       if (err) {

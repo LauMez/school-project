@@ -7,12 +7,13 @@ export class StudentController {
 
   getAll = async (req, res) => {
     const students = await this.studentModel.getAll()
-    res.json(students)
+    if (students) return res.json(students)
+    res.status(404).json({ message: 'Students not found' })
   }
 
-  getById = async (req, res) => {
+  getByID = async (req, res) => {
     const { CUIL } = req.params
-    const student = await this.studentModel.getById({ CUIL })
+    const student = await this.studentModel.getByID({ CUIL })
     if (student) return res.json(student)
     res.status(404).json({ message: 'Student not found' })
   }
