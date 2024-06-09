@@ -34,7 +34,7 @@ server.addService(courseservice.CourseService.service, {
     GetAll: async(call, callback) => {
       try {
         const courses = await new Promise((resolve, reject) => {
-          db.query('SELECT courseID FROM Course', (err, courses) => {
+          db.query('SELECT courseID, year, division FROM Course', (err, courses) => {
             if (err) reject(err);
             resolve(courses);
           });
@@ -47,24 +47,21 @@ server.addService(courseservice.CourseService.service, {
               resolve(groups);
             });
           });
-          const groupA = groups[0].courseGroup
-          const groupB = groups[1].courseGroup
 
-          const [thisCourse] = await db.promise().execute('SELECT year, division FROM Course WHERE courseID = ?', [course.courseID]);
-          const year = thisCourse[0].year
-          const division = thisCourse[0].division
-
-          return {
-            year: year,
-            division: division,
-            groupA: groupA,
-            groupB: groupB
-          }
+          return groups.map(group => ({
+            year: course.year,
+            division: course.division,
+            group: group.courseGroup,
+          }));
         })
 
-        const courseObjects = await Promise.all(coursePromises);
-        courseObjects.forEach(courseObject => call.write(courseObject));
-        call.end();
+        const courseObjects = await Promise.all(coursePromises)
+        const flattenedCourseObjects = courseObjects.flat()
+        const response = {
+          responses: flattenedCourseObjects
+        }
+
+        callback(null, response);
       } catch (error) {
         console.error('Error processing courses:', error);
         callback({ code: grpc.status.INTERNAL, details: "Internal error" });
@@ -73,24 +70,32 @@ server.addService(courseservice.CourseService.service, {
     GetByID: async(call, callback) => {
         const { courseID } = call.request;
 
-        const groups = await new Promise((resolve, reject) => {
-          db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [courseID], (err, groups) => {
-            if (err) reject(err);
-            resolve(groups);
+        try {
+          const [course] = await db.promise().execute('SELECT year, division FROM Course WHERE courseID = ?', [courseID]);
+          const year = course[0].year
+          const division = course[0].division
+
+          const groups = await new Promise((resolve, reject) => {
+            db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [courseID], (err, groups) => {
+              if (err) reject(err);
+              resolve(groups);
+            });
           });
-        });
-        const groupA = groups[0].courseGroup
-        const groupB = groups[1].courseGroup
 
-        db.query('SELECT year, division FROM Course WHERE courseID = ?', [courseID], (err, thisCourse) => {
-          if (err) {
-              callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-          }  
-          const year = thisCourse[0].year
-          const division = thisCourse[0].division
+          const groupsObjects = groups.map(group => {
+            return {
+              year: year,
+              division: division,
+              group: group.courseGroup
+            }
+          })
 
-          callback(null, { year: year, division: division, groupA: groupA, groupB: groupB })
-      })
+          groupsObjects.forEach(groupsObject => call.write(groupsObject));
+          call.end();
+        } catch (error) {
+          console.error('Error processing course:', error);
+          callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+        }
     }
 });
 

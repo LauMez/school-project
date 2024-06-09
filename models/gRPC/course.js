@@ -14,31 +14,56 @@ const courseClient = new courseservice.CourseService('localhost:50053', grpc.cre
 
 export class CourseModel {
     static async getAll () {
-        return new Promise((resolve, reject) => {
-            const courses = [];
+        // return new Promise((resolve, reject) => {
+        //     const courses = [];
       
-            const call = courseClient.GetAll();
+        //     const call = courseClient.GetAll();
+        //     call.on('data', (course) => {
+        //         courses.push(course);
+        //     });
+        //     call.on('end', () => {
+        //         resolve(courses);
+        //     });
+        //     call.on('error', (e) => {
+        //         reject(e);
+        //     });
+        // });
+
+        return new Promise((resolve, reject) => {
+            courseClient.GetAll({}, (error, response) => {
+                if (error) return reject(error);
+
+                const courses = response.responses;
+                resolve(courses);
+            });
+        })
+    }
+
+    static async getByID ({ courseID }) {
+    //     return new Promise((resolve, reject) => {
+    //         courseClient.GetByID({ courseID }, (error, response) => {
+    //           if (error) {
+    //               reject(error);
+    //           } else {
+    //               resolve(response);
+    //           }
+    //       });
+    //   });
+
+        return new Promise((resolve, reject) => {
+            const courseGroups = [];
+
+            const call = courseClient.GetByID({courseID});
             call.on('data', (course) => {
-                courses.push(course);
+                courseGroups.push(course);
+                console.log(courseGroups)
             });
             call.on('end', () => {
-                resolve(courses);
+                resolve(courseGroups);
             });
             call.on('error', (e) => {
                 reject(e);
             });
         });
-    }
-
-    static async getByID ({ courseID }) {
-        return new Promise((resolve, reject) => {
-            courseClient.GetByID({ courseID }, (error, response) => {
-              if (error) {
-                  reject(error);
-              } else {
-                  resolve(response);
-              }
-          });
-      });
     }
 }

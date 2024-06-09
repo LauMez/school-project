@@ -55,16 +55,12 @@ server.addService(bulletinservice.BulletinService.service, {
           });
 
           const periodObjects = await Promise.all(periodPromises);
-          const firstAdvance = periodObjects[2];
-          const firstPeriod = periodObjects[0];
-          const secondAdvance = periodObjects[3];
-          const secondPeriod = periodObjects[1];
 
           return {
-            firstAdvanceNote: firstAdvance,
-            firstPeriodNote: firstPeriod,
-            secondAdvanceNote: secondAdvance,
-            secondPeriodNote: secondPeriod
+            firstAdvanceNote: periodObjects[0],
+            firstPeriodNote: periodObjects[1],
+            secondAdvanceNote: periodObjects[2],
+            secondPeriodNote: periodObjects[3]
           };
         } catch (error) {
           console.error('Error processing periods:', error);
@@ -100,12 +96,8 @@ server.addService(bulletinservice.BulletinService.service, {
       })
   
       const periodObjects = await Promise.all(periodPromises);
-      const firstAdvance = periodObjects[2];
-      const firstPeriod = periodObjects[0];
-      const secondAdvance = periodObjects[3];
-      const secondPeriod = periodObjects[1];
   
-      callback(null, { firstAdvanceNote: firstAdvance, firstPeriodNote: firstPeriod, secondAdvanceNote: secondAdvance, secondPeriodNote: secondPeriod });
+      callback(null, { firstAdvanceNote: periodObjects[0], firstPeriodNote: periodObjects[1], secondAdvanceNote: periodObjects[2], secondPeriodNote: periodObjects[3] });
     } catch {
       callback({ code: grpc.status.NOT_FOUND, details: "Bulletin not found" });
     }

@@ -30,45 +30,69 @@ db.connect(err => {
   console.log('Connected to database.');
 });
 server.addService(subjectservice.SubjectService.service, {
-    GetAll: (call, callback) => {
-        db.query('SELECT subjectID, name FROM Subject', async (err, subjects) => {
-            if (err) callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-
-            try {
-                const promises = subjects.map(async (subject) => {
-                    const [subjectSchedule] = await db.promise().execute('SELECT day, schedule FROM Subject_Schedule WHERE subjectID = ?', [subject.subjectID]);
-                    return {
-                        name: subject.name,
-                        day: subjectSchedule[0].day,
-                        schedule: subjectSchedule[0].schedule
-                    };
-                });
-    
-                const subjectObjects = await Promise.all(promises);
-                subjectObjects.forEach(subjectObject => call.write(subjectObject));
-                call.end();
-            } catch (error) {
-                console.error('Error processing subjects:', error);
-                callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-            }
+    GetAll: async(call, callback) => {
+      try{
+        const subjects = await new Promise((resolve, reject) => {
+          db.query('SELECT subjectID, name FROM Subject', (err, subjects) => {
+            if (err) reject(err);
+            resolve(subjects);
+          })
         })
-    },   
-    GetByID: (call, callback) => {
-        const { subjectID } = call.request;
-        db.query('SELECT name FROM Subject WHERE subjectID = ?', [subjectID], (err, subject) => {
-        if (err) callback({ code: grpc.status.INTERNAL, details: "Internal error" });
 
-            const name = subject[0].name
-
-            db.query('SELECT day, schedule FROM Subject_Schedule WHERE subjectID = ?', [subjectID], (err, subjectSchedule) => {
-                if (err) callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-
-                const day = subjectSchedule[0].day
-                const schedule = subjectSchedule[0].schedule
-
-                callback(null, { name: name, day: day, schedule: schedule })
+        const subjectPromises = subjects.map(async (subject) => {
+          const schedules = await new Promise((resolve, reject) => {
+            db.query('SELECT day, schedule FROM Subject_Schedule WHERE subjectID = ?', [subject.subjectID], (err, schedules) => {
+              if(err) reject(err)
+              resolve(schedules)
             })
-        });
+          })
+
+          return schedules.map(schedule => ({
+            name: subject.name,
+            day: schedule.day,
+            schedule: schedule.schedule,
+          }));
+        })
+
+        const subjectObjects = await Promise.all(subjectPromises)
+        const flattenedSubjectObjects = subjectObjects.flat()
+        const response = {
+          responses: flattenedSubjectObjects
+        }
+
+        callback(null, response);
+      } catch (error) {
+        console.error('Error processing subjects:', error);
+        callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+      }
+    },   
+    GetByID: async(call, callback) => {
+        const { subjectID } = call.request;
+        try {
+          const [subject] = await db.promise().execute('SELECT name FROM Subject WHERE subjectID = ?', [subjectID]);
+          const name = subject[0].name
+
+          const schedules = await new Promise((resolve, reject) => {
+            db.query('SELECT day, schedule FROM Subject_Schedule WHERE subjectID = ?', [subjectID], (err, schedules) => {
+              if(err) reject(err)
+              resolve(schedules)
+            })
+          })
+
+          const scheduleObjects = schedules.map(schedule => {
+            return {
+              name: name,
+              day: schedule.day,
+              schedule: schedule.schedule
+            }
+          });
+
+          scheduleObjects.forEach(scheduleObject => call.write(scheduleObject));
+          call.end();
+        } catch (error) {
+          console.error('Error processing subject:', error);
+          callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+        }
     }
 });
 

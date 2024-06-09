@@ -3,8 +3,8 @@ syntax = "proto3";
 package courseservice;
 
 service CourseService {
-  rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {}
-  rpc GetByID (GetByIDRequest) returns (GetByIDResponse) {}
+  rpc GetAll (GetAllRequest) returns (GetAllResponses) {}
+  rpc GetByID (GetByIDRequest) returns (stream GetByIDResponse) {}
 }
 
 message GetAllRequest {}
@@ -12,8 +12,11 @@ message GetAllRequest {}
 message GetAllResponse {
   int32 year = 1;
   int32 division = 2;
-  string groupA = 3;
-  string groupB = 4;
+  string group = 3;
+}
+
+message GetAllResponses {
+  repeated GetAllResponse responses = 1;
 }
 
 message GetByIDRequest {
@@ -23,6 +26,5 @@ message GetByIDRequest {
 message GetByIDResponse {
   int32 year = 1;
   int32 division = 2;
-  string groupA = 3;
-  string groupB = 4;
+  string group = 3;
 }

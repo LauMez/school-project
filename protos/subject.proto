@@ -3,8 +3,8 @@ syntax = "proto3";
 package subjectservice;
 
 service SubjectService {
-    rpc GetAll (GetAllRequest) returns (stream GetAllResponse) {} 
-    rpc GetByID (GetRequest) returns (GetResponse) {}
+    rpc GetAll (GetAllRequest) returns (GetAllResponses) {} 
+    rpc GetByID (GetRequest) returns (stream GetResponse) {}
 }
 
 message GetAllRequest {}
@@ -13,6 +13,10 @@ message GetAllResponse {
     string name = 1;
     string day = 2;
     string schedule = 3;
+}
+
+message GetAllResponses {
+    repeated GetAllResponse responses = 1;
 }
 
 message GetRequest {
