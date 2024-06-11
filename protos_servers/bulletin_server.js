@@ -39,6 +39,12 @@ server.addService(bulletinservice.BulletinService.service, {
         });
       });
 
+      if (bulletins.length === 0) {
+        console.error('Bulletins not found');
+        call.end()
+        return;
+      }
+
       const bulletinPromises = bulletins.map(async (bulletin) => {
         try {
           const periods = await new Promise((resolve, reject) => {
@@ -47,6 +53,12 @@ server.addService(bulletinservice.BulletinService.service, {
               resolve(periods);
             });
           });
+
+          if (!periods) {
+            console.error('Periods not found');
+            call.emit('error', { code: grpc.status.NOT_FOUND, message: "Periods not found" });
+            return;
+          }
 
           const periodPromises = periods.map(async (period) => {
             const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
@@ -63,8 +75,8 @@ server.addService(bulletinservice.BulletinService.service, {
             secondPeriodNote: periodObjects[3]
           };
         } catch (error) {
-          console.error('Error processing periods:', error);
-          callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+          console.error('Error processing course:', error);
+          call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
         }
       });
 
@@ -72,8 +84,8 @@ server.addService(bulletinservice.BulletinService.service, {
       bulletinObjects.forEach(bulletinObject => call.write(bulletinObject));
       call.end();
     } catch (error) {
-      console.error('Error processing bulletins:', error);
-      callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+      console.error('Error processing course:', error);
+      call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
     }
   }, 
   GetByID: async(call, callback) => {
@@ -86,6 +98,11 @@ server.addService(bulletinservice.BulletinService.service, {
           resolve(bulletins);
         });
       });
+
+      if (periods.length === 0) {
+        console.error('Periods not found with ID: ', bulletinID);
+        callback(null, periods);
+      }
   
       const periodPromises = periods.map(async (period) => {
         const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
@@ -99,7 +116,8 @@ server.addService(bulletinservice.BulletinService.service, {
   
       callback(null, { firstAdvanceNote: periodObjects[0], firstPeriodNote: periodObjects[1], secondAdvanceNote: periodObjects[2], secondPeriodNote: periodObjects[3] });
     } catch {
-      callback({ code: grpc.status.NOT_FOUND, details: "Bulletin not found" });
+      console.error('Error processing courses:', error);
+      callback({ code: grpc.status.INTERNAL, details: "Internal error" });
     }
   }
 });

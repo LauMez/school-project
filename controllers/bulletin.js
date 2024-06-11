@@ -4,15 +4,32 @@ export class BulletinController {
   }
 
   getAll = async(req, res) => {
-    const bulletins = await this.bulletinModel.getAll()
-    if(bulletins) return res.json(bulletins)
-    res.status(404).json({ message: 'Bulletins not found' })
+    try {
+      const bulletins = await this.bulletinModel.getAll()
+      if (bulletins.length === 0) {
+        return res.status(404).json({ message: 'Bulletins not found' })
+      }
+
+      return res.json(bulletins);
+    } catch (error) {
+      console.error('Error occurred while fetching bulletins:', error);
+      return res.status(500).json({ message: 'Internal server error' })
+    }
   }
 
   getByID = async (req, res) => {
     const { bulletinID } = req.params
-    const bulletin = await this.bulletinModel.getByID({ bulletinID })
-    if (bulletin) return res.json(bulletin)
-    res.status(404).json({ message: 'Bulletin not found' })
+    try {
+      const bulletin = await this.bulletinModel.getByID({ bulletinID })
+
+      if (bulletin.length === 0) {
+          return res.status(404).json({ message: 'Bulletin not found' });
+      }
+
+      return res.json(bulletin);
+    } catch (error) {
+        console.error('Error occurred while fetching bulletin:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
   }
 }

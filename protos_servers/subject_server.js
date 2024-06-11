@@ -39,6 +39,11 @@ server.addService(subjectservice.SubjectService.service, {
           })
         })
 
+        if (subjects.length === 0) {
+          console.error('Subjects not found');
+          callback(null, subjects);
+        }
+
         const subjectPromises = subjects.map(async (subject) => {
           const schedules = await new Promise((resolve, reject) => {
             db.query('SELECT day, schedule FROM Subject_Schedule WHERE subjectID = ?', [subject.subjectID], (err, schedules) => {
@@ -46,6 +51,12 @@ server.addService(subjectservice.SubjectService.service, {
               resolve(schedules)
             })
           })
+
+          if (!schedules) {
+            console.error('Groups not found:');
+            callback({code: grpc.status.NOT_FOUND, message: "Schedules not found" });
+            return;
+          }
 
           return schedules.map(schedule => ({
             name: subject.name,
@@ -70,6 +81,13 @@ server.addService(subjectservice.SubjectService.service, {
         const { subjectID } = call.request;
         try {
           const [subject] = await db.promise().execute('SELECT name FROM Subject WHERE subjectID = ?', [subjectID]);
+
+          if (!subject[0]) {
+            console.error('Subject not found with ID:', subjectID);
+            call.end()
+            return;
+          }
+
           const name = subject[0].name
 
           const schedules = await new Promise((resolve, reject) => {
@@ -78,6 +96,12 @@ server.addService(subjectservice.SubjectService.service, {
               resolve(schedules)
             })
           })
+
+          if (!schedules) {
+            console.error('Schedules not found with ID:', subjectID);
+            call.emit('error', { code: grpc.status.NOT_FOUND, message: "Schedules not found" });
+            return;
+          }
 
           const scheduleObjects = schedules.map(schedule => {
             return {

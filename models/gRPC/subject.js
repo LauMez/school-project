@@ -32,7 +32,12 @@ export class SubjectModel {
 
         return new Promise((resolve, reject) => {
             subjectClient.GetAll({}, (error, response) => {
-                if (error) return reject(error);
+                if(!response) {
+                    const subjects = []
+                    resolve(subjects)
+                }
+
+                if (error) return reject(new Error('Internal server error'));
 
                 const subjects = response.responses;
                 resolve(subjects);
@@ -47,13 +52,12 @@ export class SubjectModel {
             const call = subjectClient.GetByID({subjectID});
             call.on('data', (subject) => {
                 subjectSchedules.push(subject);
-                console.log(subjectSchedules)
             });
             call.on('end', () => {
                 resolve(subjectSchedules);
             });
             call.on('error', (e) => {
-                reject(e);
+                reject(new Error('Internal server error'));
             });
         });
     }

@@ -40,6 +40,11 @@ server.addService(courseservice.CourseService.service, {
           });
         });
 
+        if (courses.length === 0) {
+          console.error('Courses not found');
+          callback(null, courses);
+        }
+
         const coursePromises = courses.map(async (course) => {
           const groups = await new Promise((resolve, reject) => {
             db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [course.courseID], (err, groups) => {
@@ -47,6 +52,12 @@ server.addService(courseservice.CourseService.service, {
               resolve(groups);
             });
           });
+
+          if (!groups) {
+            console.error('Groups not found:');
+            callback({code: grpc.status.NOT_FOUND, message: "Groups not found" });
+            return;
+          }
 
           return groups.map(group => ({
             year: course.year,
@@ -72,6 +83,13 @@ server.addService(courseservice.CourseService.service, {
 
         try {
           const [course] = await db.promise().execute('SELECT year, division FROM Course WHERE courseID = ?', [courseID]);
+
+          if (!course[0]) {
+            console.error('Course not found with ID:', courseID);
+            call.end()
+            return;
+          }
+
           const year = course[0].year
           const division = course[0].division
 
@@ -81,6 +99,12 @@ server.addService(courseservice.CourseService.service, {
               resolve(groups);
             });
           });
+
+          if (!groups) {
+            console.error('Groups not found with ID:', courseID);
+            call.emit('error', { code: grpc.status.NOT_FOUND, message: "Groups not found" });
+            return;
+          }
 
           const groupsObjects = groups.map(group => {
             return {
@@ -94,7 +118,7 @@ server.addService(courseservice.CourseService.service, {
           call.end();
         } catch (error) {
           console.error('Error processing course:', error);
-          callback({ code: grpc.status.INTERNAL, details: "Internal error" });
+          call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
         }
     }
 });

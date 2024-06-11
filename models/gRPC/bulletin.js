@@ -25,20 +25,25 @@ export class BulletinModel {
             call.on('end', () => {
                 resolve(bulletins);
             });
-            call.on('error', (e) => {
-                reject(e);
+            call.on('error', () => {
+                reject(new Error('Internal server error'));
             });
         });
     }
 
     static async getByID ({ bulletinID }) {
         return new Promise((resolve, reject) => {
-            bulletinClient.GetByID({ bulletinID }, (error, response) => {
-              if (error) {
-                  reject(error);
-              } else {
-                  resolve(response);
-              }
+            bulletinClient.GetByID({ bulletinID }, (error, bulletin) => {
+            if(!bulletin) {
+                const bulletin = []
+                resolve(bulletin)
+            }
+
+            if (error) return reject(new Error('Internal server error'));
+
+            // const bulletin = response.responses;
+            console.log(bulletin)
+            resolve(bulletin);
           });
       });
     }
