@@ -7,24 +7,24 @@ service SubjectService {
     rpc GetByID (GetRequest) returns (stream GetResponse) {}
 }
 
-message GetAllRequest {}
+message GetAllRequest {};
 
 message GetAllResponse {
     string name = 1;
     string day = 2;
     string schedule = 3;
-}
+};
 
 message GetAllResponses {
     repeated GetAllResponse responses = 1;
-}
+};
 
 message GetRequest {
     int32 subjectID = 1;
-}
+};
 
 message GetResponse {
     string name = 1;
     string day = 2;
     string schedule = 3;
-}
+};

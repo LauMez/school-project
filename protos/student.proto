@@ -7,7 +7,7 @@ service StudentService {
   rpc GetByID (GetByIDRequest) returns (GetByIDResponse) {}
 }
 
-message GetAllRequest {}
+message GetAllRequest {};
 
 message GetAllResponse {
   int32 CUIL = 1;
@@ -17,11 +17,11 @@ message GetAllResponse {
   string last_name2 = 5;
   string phone_number = 6;
   string direction = 7;
-}
+};
 
 message GetByIDRequest {
   int32 CUIL = 1;
-}
+};
 
 message GetByIDResponse {
   int32 CUIL = 1;
@@ -31,4 +31,4 @@ message GetByIDResponse {
   string last_name2 = 5;
   string phone_number = 6;
   string direction = 7;
-}
+};

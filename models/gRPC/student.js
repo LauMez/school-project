@@ -1,6 +1,5 @@
-// import client from '../../student_client.js'
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
 
 const packageDefinition = protoLoader.loadSync('protos/student.proto', {
   keepCase: true,
@@ -16,30 +15,34 @@ const studentClient = new studentservice.StudentService('localhost:50052', grpc.
 export class StudentModel {
   static async getAll () {
     return new Promise((resolve, reject) => {
-      const rows = [];
+      const students = [];
 
       const call = studentClient.GetAll();
-      call.on('data', (data) => {
-          rows.push(data);
+
+      call.on('data', (student) => {
+        students.push(student);
       });
       call.on('end', () => {
-          resolve(rows);
+        resolve(students);
       });
-      call.on('error', (e) => {
-          reject(e);
+      call.on('error', () => {
+        reject(new Error('Internal server error'));
       });
-  });
-  }
+    });
+  };
 
   static async getByID ({ CUIL }) {
     return new Promise((resolve, reject) => {
-      studentClient.GetByID({ CUIL }, (error, response) => {
-          if (error) {
-              reject(error);
-          } else {
-              resolve(response);
-          }
+      studentClient.GetByID({ CUIL }, (error, student) => {
+        if(!student) {
+          const student = [];
+          resolve(student);
+        };
+
+        if (error) return reject(new Error('Internal server error'));
+
+        resolve(student);
       });
-  });
-  }
-}
+    });
+  };
+};

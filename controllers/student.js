@@ -1,59 +1,72 @@
-import { validateMovie, validatePartialMovie } from '../schemas/student.js'
-
 export class StudentController {
   constructor ({ studentModel }) {
     this.studentModel = studentModel
-  }
+  };
 
   getAll = async (req, res) => {
-    const students = await this.studentModel.getAll()
-    if (students) return res.json(students)
-    res.status(404).json({ message: 'Students not found' })
-  }
+    try {
+      const students = await this.studentModel.getAll();
+
+      if (students.length === 0) return res.status(404).json({ message: 'Students not found' });
+
+      return res.json(students);
+    } catch (error) {
+      console.error('Error occurred while fetching students:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    };
+  };
 
   getByID = async (req, res) => {
-    const { CUIL } = req.params
-    const student = await this.studentModel.getByID({ CUIL })
-    if (student) return res.json(student)
-    res.status(404).json({ message: 'Student not found' })
-  }
+    const { CUIL } = req.params;
 
-  create = async (req, res) => {
-    const result = validateMovie(req.body)
+    try {
+      const student = await this.studentModel.getByID({ CUIL });
 
-    if (!result.success) {
-    // 422 Unprocessable Entity
-      return res.status(400).json({ error: JSON.parse(result.error.message) })
-    }
+      if (student.length === 0) return res.status(404).json({ message: 'Student not found' });
+  
+      return res.json(student);
+    } catch (error) {
+      console.error('Error occurred while fetching student:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    };
+  };
 
-    const newStudent = await this.studentModel.create({ input: result.data })
+  // create = async (req, res) => {
+  //   const result = validateMovie(req.body)
 
-    res.status(201).json(newStudent)
-  }
+  //   if (!result.success) {
+  //   // 422 Unprocessable Entity
+  //     return res.status(400).json({ error: JSON.parse(result.error.message) })
+  //   }
 
-  delete = async (req, res) => {
-    const { id } = req.params
+  //   const newStudent = await this.studentModel.create({ input: result.data })
 
-    const result = await this.studentModel.delete({ id })
+  //   res.status(201).json(newStudent)
+  // }
 
-    if (result === false) {
-      return res.status(404).json({ message: 'Movie not found' })
-    }
+  // delete = async (req, res) => {
+  //   const { id } = req.params
 
-    return res.json({ message: 'Student deleted' })
-  }
+  //   const result = await this.studentModel.delete({ id })
 
-  update = async (req, res) => {
-    const result = validatePartialMovie(req.body)
+  //   if (result === false) {
+  //     return res.status(404).json({ message: 'Movie not found' })
+  //   }
 
-    if (!result.success) {
-      return res.status(400).json({ error: JSON.parse(result.error.message) })
-    }
+  //   return res.json({ message: 'Student deleted' })
+  // }
 
-    const { id } = req.params
+  // update = async (req, res) => {
+  //   const result = validatePartialMovie(req.body)
 
-    const updatedStudent = await this.studentModel.update({ id, input: result.data })
+  //   if (!result.success) {
+  //     return res.status(400).json({ error: JSON.parse(result.error.message) })
+  //   }
 
-    return res.json(updatedStudent)
-  }
-}
+  //   const { id } = req.params
+
+  //   const updatedStudent = await this.studentModel.update({ id, input: result.data })
+
+  //   return res.json(updatedStudent)
+  // }
+};

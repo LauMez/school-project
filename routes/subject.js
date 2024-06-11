@@ -1,13 +1,13 @@
-import { Router } from 'express'
-import { SubjectController } from '../controllers/subject.js'
+import { Router } from 'express';
+import { SubjectController } from '../controllers/subject.js';
 
 export const createSubjectRouter = ({ subjectModel }) => {
-  const subjectRouter = Router()
+  const subjectRouter = Router();
 
-  const subjectController = new SubjectController({ subjectModel })
+  const subjectController = new SubjectController({ subjectModel });
 
-  subjectRouter.get('/', subjectController.getAll)
-  subjectRouter.get('/:subjectID', subjectController.getByID)
+  subjectRouter.get('/', subjectController.getAll);
+  subjectRouter.get('/:subjectID', subjectController.getByID);
 
-  return subjectRouter
+  return subjectRouter;
 }

@@ -1,5 +1,5 @@
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
 
 const packageDefinition = protoLoader.loadSync('protos/bulletin.proto', {
   keepCase: true,
@@ -13,7 +13,6 @@ const bulletinservice = grpc.loadPackageDefinition(packageDefinition).bulletinse
 const bulletinClient = new bulletinservice.BulletinService('localhost:50054', grpc.credentials.createInsecure());
 
 export class BulletinModel {
-
     static async getAll () {
         return new Promise((resolve, reject) => {
             const bulletins = [];
@@ -35,16 +34,14 @@ export class BulletinModel {
         return new Promise((resolve, reject) => {
             bulletinClient.GetByID({ bulletinID }, (error, bulletin) => {
             if(!bulletin) {
-                const bulletin = []
-                resolve(bulletin)
-            }
+                const bulletin = [];
+                resolve(bulletin);
+            };
 
             if (error) return reject(new Error('Internal server error'));
 
-            // const bulletin = response.responses;
-            console.log(bulletin)
             resolve(bulletin);
           });
       });
-    }
-}
+    };
+};

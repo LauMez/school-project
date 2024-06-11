@@ -1,5 +1,5 @@
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
 
 const packageDefinition = protoLoader.loadSync('protos/subject.proto', {
   keepCase: true,
@@ -14,51 +14,36 @@ const subjectClient = new subjectservice.SubjectService('localhost:50051', grpc.
 
 export class SubjectModel {
     static async getAll () {
-        // return new Promise((resolve, reject) => {
-        //     const subjects = [];
-      
-        //     const call = subjectClient.GetAll();
-        //     call.on('data', (subject) => {
-        //         subjects.push(subject);
-        //         console.log(subjects)
-        //     });
-        //     call.on('end', () => {
-        //         resolve(subjects);
-        //     });
-        //     call.on('error', (e) => {
-        //         reject(e);
-        //     });
-        // });
-
         return new Promise((resolve, reject) => {
             subjectClient.GetAll({}, (error, response) => {
                 if(!response) {
-                    const subjects = []
-                    resolve(subjects)
-                }
+                    const subjects = [];
+                    resolve(subjects);
+                };
 
                 if (error) return reject(new Error('Internal server error'));
 
                 const subjects = response.responses;
                 resolve(subjects);
             });
-        })
-    }
+        });
+    };
 
     static async getByID ({ subjectID }) {
         return new Promise((resolve, reject) => {
             const subjectSchedules = [];
     
             const call = subjectClient.GetByID({subjectID});
+
             call.on('data', (subject) => {
                 subjectSchedules.push(subject);
             });
             call.on('end', () => {
                 resolve(subjectSchedules);
             });
-            call.on('error', (e) => {
+            call.on('error', () => {
                 reject(new Error('Internal server error'));
             });
         });
-    }
-}
+    };
+};
