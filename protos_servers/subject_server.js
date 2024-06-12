@@ -45,7 +45,7 @@ server.addService(subjectservice.SubjectService.service, {
       if (subjects.length === 0) {
         console.error('Subjects not found');
         callback(null, subjects);
-      }
+      };
 
       const subjectPromises = subjects.map(async (subject) => {
         const schedules = await new Promise((resolve, reject) => {
@@ -70,9 +70,7 @@ server.addService(subjectservice.SubjectService.service, {
       });
 
       const subjectObjects = await Promise.all(subjectPromises);
-
       const flattenedSubjectObjects = subjectObjects.flat();
-
       const response = { responses: flattenedSubjectObjects };
 
       callback(null, response);

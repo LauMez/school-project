@@ -1,14 +1,15 @@
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
-import mysql from 'mysql2'
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
+import mysql from 'mysql2';
 
 const DEFAULT_CONFIG = {
   host: 'localhost',
   user: 'root',
   password: '',
   database: 'bulletinDB'
-}
-const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG
+};
+
+const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
 
 const packageDefinition = protoLoader.loadSync('../protos/bulletin.proto', {
   keepCase: true,
@@ -26,22 +27,25 @@ db.connect(err => {
   if (err) {
     console.error('Database connection failed:', err.stack);
     return;
-  }
+  };
+
   console.log('Connected to database.');
 });
+
 server.addService(bulletinservice.BulletinService.service, {
   GetAll: async (call, callback) => {
     try {
       const bulletins = await new Promise((resolve, reject) => {
         db.query('SELECT bulletinID FROM Bulletin', (err, bulletins) => {
           if (err) reject(err);
+
           resolve(bulletins);
         });
       });
 
       if (bulletins.length === 0) {
         console.error('Bulletins not found');
-        call.end()
+        call.end();
         return;
       }
 
@@ -50,6 +54,7 @@ server.addService(bulletinservice.BulletinService.service, {
           const periods = await new Promise((resolve, reject) => {
             db.query('SELECT periodID FROM Period WHERE bulletinID = ?', [bulletin.bulletinID], (err, periods) => {
               if (err) reject(err);
+
               resolve(periods);
             });
           });
@@ -62,7 +67,9 @@ server.addService(bulletinservice.BulletinService.service, {
 
           const periodPromises = periods.map(async (period) => {
             const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
+
             const [assessment] = await db.promise().execute('SELECT qualification FROM Assessment WHERE assessmentID = ?', [pedagogicalAssessment[0].assessmentID]);
+
             return assessment[0].qualification;
           });
 
@@ -77,7 +84,7 @@ server.addService(bulletinservice.BulletinService.service, {
         } catch (error) {
           console.error('Error processing course:', error);
           call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
-        }
+        };
       });
 
       const bulletinObjects = await Promise.all(bulletinPromises);
@@ -102,7 +109,7 @@ server.addService(bulletinservice.BulletinService.service, {
       if (periods.length === 0) {
         console.error('Periods not found with ID: ', bulletinID);
         callback(null, periods);
-      }
+      };
   
       const periodPromises = periods.map(async (period) => {
         const [pedagogicalAssessment] = await db.promise().execute('SELECT assessmentID FROM Pedagogical_Assessment WHERE periodID = ?', [period.periodID]);
@@ -118,7 +125,7 @@ server.addService(bulletinservice.BulletinService.service, {
     } catch {
       console.error('Error processing courses:', error);
       callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-    }
+    };
   }
 });
 

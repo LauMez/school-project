@@ -1,20 +1,20 @@
-import express, { json } from 'express'
-import { createStudentRouter } from './routes/student.js'
-import { createBulletinRouter } from './routes/bulletin.js'
-import { createCourseRouter } from './routes/course.js'
-import { createSubjectRouter } from './routes/subject.js'
-import { corsMiddleware } from './middlewares/cors.js'
-import 'dotenv/config'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import axios from 'axios'
+import express, { json } from 'express';
+import { createStudentRouter } from './routes/student.js';
+import { createBulletinRouter } from './routes/bulletin.js';
+import { createCourseRouter } from './routes/course.js';
+import { createSubjectRouter } from './routes/subject.js';
+import { corsMiddleware } from './middlewares/cors.js';
+import 'dotenv/config';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import axios from 'axios';
 
 // después
 export const createApp = ({ studentModel, bulletinModel, courseModel,subjectModel }) => {
-  const app = express()
-  app.use(json())
-  app.use(corsMiddleware())
-  app.disable('x-powered-by')
+  const app = express();
+  app.use(json());
+  app.use(corsMiddleware());
+  app.disable('x-powered-by');
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
@@ -22,10 +22,10 @@ export const createApp = ({ studentModel, bulletinModel, courseModel,subjectMode
   app.set('views', path.join(__dirname, 'views'));
   app.set('view engine', 'ejs');
 
-  app.use('/student', createStudentRouter({ studentModel }))
-  app.use('/bulletin', createBulletinRouter({ bulletinModel }))
-  app.use('/course', createCourseRouter({ courseModel }))
-  app.use('/subject', createSubjectRouter({ subjectModel }))
+  app.use('/student', createStudentRouter({ studentModel }));
+  app.use('/bulletin', createBulletinRouter({ bulletinModel }));
+  app.use('/course', createCourseRouter({ courseModel }));
+  app.use('/subject', createSubjectRouter({ subjectModel }));
 
   // app.get('/', async (req, res) => {
   //   const response = await axios.get('http://localhost:1234/student')
@@ -40,9 +40,9 @@ export const createApp = ({ studentModel, bulletinModel, courseModel,subjectMode
   //   res.render('index', {students});
   // })
 
-  const PORT = process.env.PORT ?? 1234
+  const PORT = process.env.PORT ?? 1234;
 
   app.listen(PORT, () => {
-    console.log(`server listening on port http://localhost:${PORT}`)
-  })
-}
+    console.log(`server listening on port http://localhost:${PORT}`);
+  });
+};

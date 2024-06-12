@@ -1,5 +1,5 @@
-import grpc from '@grpc/grpc-js'
-import protoLoader from '@grpc/proto-loader'
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
 
 const packageDefinition = protoLoader.loadSync('protos/course.proto', {
   keepCase: true,
@@ -17,23 +17,24 @@ export class CourseModel {
         return new Promise((resolve, reject) => {
             courseClient.GetAll({}, (error, response) => {
                 if(!response) {
-                    const courses = []
-                    resolve(courses)
-                }
+                    const courses = [];
+                    resolve(courses);
+                };
 
                 if (error) return reject(new Error('Internal server error'));
 
                 const courses = response.responses;
                 resolve(courses);
             });
-        })
-    }
+        });
+    };
 
     static async getByID ({ courseID }) {
         return new Promise((resolve, reject) => {
             const courseGroups = [];
 
             const call = courseClient.GetByID({courseID});
+            
             call.on('data', (course) => {
                 courseGroups.push(course);
             });
@@ -44,5 +45,5 @@ export class CourseModel {
                 reject(new Error('Internal server error'));
             });
         });
-    }
-}
+    };
+};

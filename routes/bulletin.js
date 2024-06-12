@@ -1,17 +1,13 @@
-import { Router } from 'express'
-import { BulletinController } from '../controllers/bulletin.js'
+import { Router } from 'express';
+import { BulletinController } from '../controllers/bulletin.js';
 
 export const createBulletinRouter = ({ bulletinModel }) => {
-  const bulletinRouter = Router()
+  const bulletinRouter = Router();
 
-  const bulletinController = new BulletinController({ bulletinModel })
+  const bulletinController = new BulletinController({ bulletinModel });
 
-  bulletinRouter.get('/', bulletinController.getAll)
-//   bulletinRouter.post('/', bulletinController.create)
+  bulletinRouter.get('/', bulletinController.getAll);
+  bulletinRouter.get('/:bulletinID', bulletinController.getByID);
 
-  bulletinRouter.get('/:bulletinID', bulletinController.getByID)
-//   bulletinRouter.delete('/:id', bulletinController.delete)
-//   bulletinRouter.patch('/:id', bulletinController.update)
-
-  return bulletinRouter
-}
+  return bulletinRouter;
+};

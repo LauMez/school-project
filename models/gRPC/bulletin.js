@@ -18,6 +18,7 @@ export class BulletinModel {
             const bulletins = [];
       
             const call = bulletinClient.GetAll();
+            
             call.on('data', (bulletin) => {
                 bulletins.push(bulletin);
             });
@@ -28,7 +29,7 @@ export class BulletinModel {
                 reject(new Error('Internal server error'));
             });
         });
-    }
+    };
 
     static async getByID ({ bulletinID }) {
         return new Promise((resolve, reject) => {
