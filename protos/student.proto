@@ -10,25 +10,33 @@ service StudentService {
 message GetAllRequest {};
 
 message GetAllResponse {
-  int32 CUIL = 1;
-  string first_name = 2;
-  string second_name = 3;
-  string last_name1 = 4;
-  string last_name2 = 5;
-  string phone_number = 6;
-  string direction = 7;
+  string CUIL = 1;
+  string DNI = 2;
+  string first_name = 3;
+  string second_name = 4;
+  string last_name1 = 5;
+  string last_name2 = 6;
+  string phone_number = 7;
+  string landline_phone_number = 8;
+  string direction = 9;
+  string blood_type = 10;
+  string social_work = 11;
 };
 
 message GetByIDRequest {
-  int32 CUIL = 1;
+  string CUIL = 1;
 };
 
 message GetByIDResponse {
-  int32 CUIL = 1;
-  string first_name = 2;
-  string second_name = 3;
-  string last_name1 = 4;
-  string last_name2 = 5;
-  string phone_number = 6;
-  string direction = 7;
+  string CUIL = 1;
+  string DNI = 2;
+  string first_name = 3;
+  string second_name = 4;
+  string last_name1 = 5;
+  string last_name2 = 6;
+  string phone_number = 7;
+  string landline_phone_number = 8;
+  string direction = 9;
+  string blood_type = 10;
+  string social_work = 11;
 };

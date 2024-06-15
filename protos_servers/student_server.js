@@ -48,19 +48,35 @@ server.addService(studentservice.StudentService.service, {
         call.end();
       };
 
-      const studentObjects = students.map(student => {
+      const studentPromises = students.map(async (student) => {
+        const [StudentInfo] = await db.promise().execute('SELECT blood_type, social_work FROM Student_Information WHERE CUIL = ?', [student.CUIL]);
+
+        const studentInfo = StudentInfo[0];
+
+        if (!studentInfo) {
+          console.error('Student ifno not found with CUIL:', student.CUIL);
+          call.end();
+        };
+
         return {
           CUIL: student.CUIL,
+          DNI: student.DNI,
           first_name: student.first_name,
           second_name: student.second_name,
           last_name1: student.last_name1,
           last_name2: student.last_name2,
           phone_number: student.phone_number,
-          direction: student.direction
+          landline_phone_number: student.landline_phone_number,
+          direction: student.direction,
+          blood_type: studentInfo.blood_type,
+          social_work: studentInfo.social_work
         };
       });
 
-      studentObjects.forEach(studentObject => call.write(studentObject));
+      const bulletinObjects = await Promise.all(studentPromises);
+
+      bulletinObjects.forEach(studentObject => call.write(studentObject));
+
       call.end();
     } catch (error) {
       console.error('Error processing students:', error);
@@ -81,7 +97,17 @@ server.addService(studentservice.StudentService.service, {
         return;
       };
 
-      callback(null, { CUIL: student.CUIL, first_name: student.first_name, second_name: student.second_name, last_name1: student.last_name1, last_name2: student.last_name2, phone_number: student.phone_number, direction: student.direction });
+      const [StudentInfo] = await db.promise().execute('SELECT blood_type, social_work FROM Student_Information WHERE CUIL = ?', [CUIL]); 
+
+      const studentInfo = StudentInfo[0];
+
+      if (!studentInfo) {
+        console.error('Student info not found with CUIL:', CUIL);
+        callback(null, StudentInfo);
+        return;
+      };
+
+      callback(null, { CUIL: student.CUIL, DNI: student.DNI, first_name: student.first_name, second_name: student.second_name, last_name1: student.last_name1, last_name2: student.last_name2, phone_number: student.phone_number, landline_phone_number: student.landline_phone_number, direction: student.direction, blood_type: studentInfo.blood_type, social_work: studentInfo.social_work });
     } catch (error) {
       console.error('Error processing student:', error);
       callback({ code: grpc.status.INTERNAL, details: "Internal error" });
