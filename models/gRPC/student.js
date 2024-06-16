@@ -1,48 +1,124 @@
+import mysql from 'mysql2';
+
 import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 
-const packageDefinition = protoLoader.loadSync('protos/student.proto', {
+const DEFAULT_CONFIG = {
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'studentDB'
+};
+
+const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
+
+const db = mysql.createConnection(connectionString);
+
+const packageDefinition = protoLoader.loadSync('C:/Users/Usuario/Desktop/school-project/protos/subject.proto', {
   keepCase: true,
   longs: String,
   enums: String,
   defaults: true,
   oneofs: true
 });
-const studentservice = grpc.loadPackageDefinition(packageDefinition).studentservice;
+const subjectservice = grpc.loadPackageDefinition(packageDefinition).subjectservice;
+const grpcClient = new subjectservice.CourseService('localhost:50051', grpc.credentials.createInsecure());
 
-const studentClient = new studentservice.StudentService('localhost:50052', grpc.credentials.createInsecure());
+db.connect(err => {
+  if (err) {
+    console.error('Database connection failed:', err.stack);
+    return;
+  };
+
+  console.log('Connected to database.');
+});
 
 export class StudentModel {
   static async getAll () {
-    return new Promise((resolve, reject) => {
-      const students = [];
+    try {
+      const students = await new Promise((resolve, reject) => {
+        db.query('SELECT * FROM Personal_Information', (err, students) => {
+          if (err) reject(err);
 
-      const call = studentClient.GetAll();
+          resolve(students);
+        });
+      });
 
-      call.on('data', (student) => {
-        students.push(student);
+      if (students.length === 0) {
+        console.error('Students not found');
+        return [];
+      };
+
+      const studentPromises = students.map(async (student) => {
+        const [StudentInfo] = await db.promise().execute('SELECT blood_type, social_work FROM Student_Information WHERE CUIL = ?', [student.CUIL]);
+
+        const studentInfo = StudentInfo[0];
+
+        if (!studentInfo) {
+          console.error('Student ifno not found with CUIL:', student.CUIL);
+          return [];
+        };
+
+        return {
+          CUIL: student.CUIL,
+          DNI: student.DNI,
+          first_name: student.first_name,
+          second_name: student.second_name,
+          last_name1: student.last_name1,
+          last_name2: student.last_name2,
+          phone_number: student.phone_number,
+          landline_phone_number: student.landline_phone_number,
+          direction: student.direction,
+          blood_type: studentInfo.blood_type,
+          social_work: studentInfo.social_work
+        };
       });
-      call.on('end', () => {
-        resolve(students);
-      });
-      call.on('error', () => {
-        reject(new Error('Internal server error'));
-      });
-    });
+
+      const bulletinObjects = await Promise.all(studentPromises);
+      console.log(grpcClient.getAll())
+      return bulletinObjects;
+    } catch (error) {
+      console.error('Error processing students:', error);
+      throw new Error('Internal server error');
+    };
   };
 
   static async getByID ({ CUIL }) {
-    return new Promise((resolve, reject) => {
-      studentClient.GetByID({ CUIL }, (error, student) => {
-        if(!student) {
-          const student = [];
-          resolve(student);
-        };
+    try {
+      const [Student] = await db.promise().execute('SELECT * FROM Personal_Information WHERE CUIL = ?', [CUIL]);
 
-        if (error) return reject(new Error('Internal server error'));
+      const student = Student[0];
 
-        resolve(student);
-      });
-    });
+      if (!student) {
+        console.error('Student not found with CUIL:', CUIL);
+        return [];
+      };
+
+      const [StudentInfo] = await db.promise().execute('SELECT blood_type, social_work FROM Student_Information WHERE CUIL = ?', [CUIL]); 
+
+      const studentInfo = StudentInfo[0];
+
+      if (!studentInfo) {
+        console.error('Student info not found with CUIL:', CUIL);
+        return [];
+      };
+
+      return {
+        CUIL: CUIL, 
+        DNI: student.DNI, 
+        first_name: student.first_name, 
+        second_name: student.second_name, 
+        last_name1: student.last_name1, 
+        last_name2: student.last_name2, 
+        phone_number: student.phone_number, 
+        landline_phone_number: student.landline_phone_number, 
+        direction: student.direction, 
+        blood_type: studentInfo.blood_type, 
+        social_work: studentInfo.social_work
+      };
+    } catch (error) {
+      console.error('Error processing student:', error);
+      throw new Error('Internal server error');
+    };
   };
 };
