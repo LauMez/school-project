@@ -16,7 +16,7 @@ const server = new grpc.Server();
 server.addService(studentservice.StudentService.service, {
   GetAll: async(call, callback) => {
     try{
-      const students = StudentModel.getAll();
+      const students = await StudentModel.getAll();
       callback(null, students);
     } catch (error) {
       console.error('Error processing students:', error);
@@ -24,8 +24,9 @@ server.addService(studentservice.StudentService.service, {
     };
   },
   GetByID: async(call, callback) => {
+    const { CUIL } = call.request;
     try{
-      const student = StudentModel.getByID({CUIL});
+      const student = await StudentModel.getByID({CUIL});
       callback(null, student);
     } catch (error) {
       console.error('Error processing student:', error);

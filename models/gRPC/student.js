@@ -14,7 +14,7 @@ const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
 
 const db = mysql.createConnection(connectionString);
 
-const packageDefinition = protoLoader.loadSync('C:/Users/Usuario/Desktop/school-project/protos/subject.proto', {
+const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/subject.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -22,15 +22,15 @@ const packageDefinition = protoLoader.loadSync('C:/Users/Usuario/Desktop/school-
   oneofs: true
 });
 const subjectservice = grpc.loadPackageDefinition(packageDefinition).subjectservice;
-const grpcClient = new subjectservice.CourseService('localhost:50051', grpc.credentials.createInsecure());
+const grpcClient = new subjectservice.SubjectService('localhost:50051', grpc.credentials.createInsecure());
 
 db.connect(err => {
   if (err) {
-    console.error('Database connection failed:', err.stack);
+    console.error('Student database connection failed:', err.stack);
     return;
   };
 
-  console.log('Connected to database.');
+  console.log('Connected to student database.');
 });
 
 export class StudentModel {
@@ -75,7 +75,14 @@ export class StudentModel {
       });
 
       const bulletinObjects = await Promise.all(studentPromises);
-      console.log(grpcClient.getAll())
+      grpcClient.getAll({}, (error, subjects) => {
+        if (error) {
+          console.error('Error calling gRPC getAll:', error);
+          throw new Error('gRPC call failed');
+        }
+        console.log(subjects.responses);
+      });
+
       return bulletinObjects;
     } catch (error) {
       console.error('Error processing students:', error);

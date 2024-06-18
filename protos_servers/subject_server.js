@@ -2,7 +2,7 @@ import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 import { SubjectModel } from '../models/gRPC/subject.js';
 
-const packageDefinition = protoLoader.loadSync('C:/Users/Usuario/Desktop/school-project/protos/subject.proto', {
+const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/subject.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -17,7 +17,7 @@ server.addService(subjectservice.SubjectService.service, {
   GetAll: async(call, callback) => {
     try{
       const subjects = await SubjectModel.getAll();
-      callback(null, {subjects});
+      callback(null, subjects);
     } catch (error) {
       console.error('Error processing subjects:', error);
       callback({ code: grpc.status.INTERNAL, details: "Internal error" });
@@ -27,7 +27,7 @@ server.addService(subjectservice.SubjectService.service, {
     const { subjectID } = call.request;
     try{
       const subject = await SubjectModel.getByID({subjectID});
-      callback(null, {subject});
+      callback(null, subject);
     } catch (error) {
       console.error('Error processing subject:', error);
       callback({ code: grpc.status.INTERNAL, details: "Internal error" });

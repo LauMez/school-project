@@ -1,17 +1,8 @@
 import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
-import mysql from 'mysql2';
+import { CourseModel } from '../models/gRPC/course.js';
 
-const DEFAULT_CONFIG = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'courseDB'
-};
-
-const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
-
-const packageDefinition = protoLoader.loadSync('../protos/course.proto', {
+const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/course.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -21,61 +12,12 @@ const packageDefinition = protoLoader.loadSync('../protos/course.proto', {
 const courseservice = grpc.loadPackageDefinition(packageDefinition).courseservice;
 
 const server = new grpc.Server();
-const db = mysql.createConnection(connectionString);
-
-db.connect(err => {
-  if (err) {
-    console.error('Database connection failed:', err.stack);
-    return;
-  };
-
-  console.log('Connected to database.');
-});
 
 server.addService(courseservice.CourseService.service, {
   GetAll: async(call, callback) => {
-    try {
-      const courses = await new Promise((resolve, reject) => {
-        db.query('SELECT courseID, year, division FROM Course', (err, courses) => {
-          if (err) reject(err);
-          resolve(courses);
-        });
-      });
-
-      if (courses.length === 0) {
-        console.error('Courses not found');
-        callback(null, courses);
-      };
-
-      const coursePromises = courses.map(async (course) => {
-        const groups = await new Promise((resolve, reject) => {
-          db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [course.courseID], (err, groups) => {
-            if (err) reject(err);
-
-            resolve(groups);
-          });
-        });
-
-        if (!groups) {
-          console.error('Groups not found:');
-          callback({code: grpc.status.NOT_FOUND, message: "Groups not found" });
-          return;
-        };
-
-        return groups.map(group => ({
-          year: course.year,
-          division: course.division,
-          group: group.courseGroup,
-        }));
-      });
-
-      const courseObjects = await Promise.all(coursePromises);
-      const flattenedCourseObjects = courseObjects.flat();
-      const response = {
-        responses: flattenedCourseObjects
-      };
-
-      callback(null, response);
+    try{
+      const courses = await CourseModel.getAll();
+      callback(null, courses);
     } catch (error) {
       console.error('Error processing courses:', error);
       callback({ code: grpc.status.INTERNAL, details: "Internal error" });
@@ -83,44 +25,13 @@ server.addService(courseservice.CourseService.service, {
   },
   GetByID: async(call, callback) => {
     const { courseID } = call.request;
-
-    try {
-      const [Course] = await db.promise().execute('SELECT year, division FROM Course WHERE courseID = ?', [courseID]);
-
-      const course = Course[0];
-
-      if (!course) {
-        console.error('Course not found with ID:', courseID);
-        call.end();
-        return;
-      };
-
-      const groups = await new Promise((resolve, reject) => {
-        db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [courseID], (err, groups) => {
-          if (err) reject(err);
-          resolve(groups);
-        });
-      });
-
-      if (!groups) {
-        console.error('Groups not found with ID:', courseID);
-        call.emit('error', { code: grpc.status.NOT_FOUND, message: "Groups not found" });
-        return;
-      };
-
-      const groupsObjects = groups.map(group => {
-        return {
-          year: course.year,
-          division: course.division,
-          group: group.courseGroup
-        };
-      });
-
-      groupsObjects.forEach(groupsObject => call.write(groupsObject));
-      call.end();
+    try{
+      const course = await CourseModel.getByID({courseID});
+      console.log('anda ', course);
+      callback(null, course);
     } catch (error) {
       console.error('Error processing course:', error);
-      call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
+      callback({ code: grpc.status.INTERNAL, details: "Internal error" });
     };
   }
 });

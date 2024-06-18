@@ -1,4 +1,6 @@
 import mysql from 'mysql2';
+import grpc from '@grpc/grpc-js';
+import protoLoader from '@grpc/proto-loader';
 
 const DEFAULT_CONFIG = {
     host: 'localhost',
@@ -12,17 +14,26 @@ const db = mysql.createConnection(connectionString);
 
 db.connect(err => {
     if (err) {
-        console.error('Database connection failed:', err.stack);
+        console.error('Subject database connection failed:', err.stack);
         return;
     }
-    console.log('Connected to database.');
+    console.log('Connected to subject database.');
 });
 
+const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/course.proto', {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true
+});
+const courseservice = grpc.loadPackageDefinition(packageDefinition).courseservice;
+const grpcClient = new courseservice.CourseService('localhost:50053', grpc.credentials.createInsecure());
 export class SubjectModel {
     static async getAll () {
         try{
             const subjects = await new Promise((resolve, reject) => {
-              db.query('SELECT subjectID, name FROM Subject', (err, subjects) => {
+              db.query('SELECT subjectID, courseID, name FROM Subject', (err, subjects) => {
                 if (err) reject(err);
                 resolve(subjects);
               });
@@ -46,6 +57,16 @@ export class SubjectModel {
                 console.error('Schedules not found:');
                 return [];
               };
+
+              const courseID = subject.courseID;
+              console.log('courseID: ', courseID);
+              grpcClient.GetByID({courseID}, (error, subjects) => {
+                if (error) {
+                  console.error('Error calling gRPC getAll:', error);
+                  throw new Error('gRPC call failed');
+                }
+                console.log(subjects.responses);
+              });
       
               return schedules.map(schedule => ({
                 name: subject.name,
@@ -56,9 +77,11 @@ export class SubjectModel {
       
             const subjectObjects = await Promise.all(subjectPromises);
             const flattenedSubjectObjects = subjectObjects.flat();
-            const response = { responses: flattenedSubjectObjects };
+            const response = { 
+              responses: flattenedSubjectObjects
+            };
 
-            return response;
+            return response.responses;
         } catch (error) {
             console.error('Error processing subjects:', error);
             throw new Error('Internal server error');
