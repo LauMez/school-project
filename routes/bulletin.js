@@ -9,5 +9,6 @@ export const createBulletinRouter = ({ bulletinModel }) => {
   bulletinRouter.get('/', bulletinController.getAll);
   bulletinRouter.get('/:bulletinID', bulletinController.getByID);
 
+
   return bulletinRouter;
 };

@@ -1,8 +1,5 @@
 import mysql from 'mysql2';
 
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
-
 const DEFAULT_CONFIG = {
   host: 'localhost',
   user: 'root',
@@ -13,16 +10,6 @@ const DEFAULT_CONFIG = {
 const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
 
 const db = mysql.createConnection(connectionString);
-
-const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/subject.proto', {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true
-});
-const subjectservice = grpc.loadPackageDefinition(packageDefinition).subjectservice;
-const grpcClient = new subjectservice.SubjectService('localhost:50051', grpc.credentials.createInsecure());
 
 db.connect(err => {
   if (err) {
@@ -75,13 +62,6 @@ export class StudentModel {
       });
 
       const bulletinObjects = await Promise.all(studentPromises);
-      grpcClient.getAll({}, (error, subjects) => {
-        if (error) {
-          console.error('Error calling gRPC getAll:', error);
-          throw new Error('gRPC call failed');
-        }
-        console.log(subjects.responses);
-      });
 
       return bulletinObjects;
     } catch (error) {

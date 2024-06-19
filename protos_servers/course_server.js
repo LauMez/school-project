@@ -2,7 +2,7 @@ import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 import { CourseModel } from '../models/gRPC/course.js';
 
-const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/course.proto', {
+const packageDefinition = protoLoader.loadSync('../protos/course.proto', {
   keepCase: true,
   longs: String,
   enums: String,
@@ -25,14 +25,14 @@ server.addService(courseservice.CourseService.service, {
   },
   GetByID: async(call, callback) => {
     const { courseID } = call.request;
-    try{
-      const course = await CourseModel.getByID({courseID});
-      console.log('anda ', course);
-      callback(null, course);
+    try {
+      const course = await CourseModel.getByID({ courseID });
+      course.forEach(courseDetail => call.write(courseDetail));
+      call.end();
     } catch (error) {
       console.error('Error processing course:', error);
-      callback({ code: grpc.status.INTERNAL, details: "Internal error" });
-    };
+      call.emit('error', { code: grpc.status.INTERNAL, details: "Internal error" });
+    }
   }
 });
 

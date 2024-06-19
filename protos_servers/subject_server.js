@@ -2,7 +2,7 @@ import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 import { SubjectModel } from '../models/gRPC/subject.js';
 
-const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/subject.proto', {
+const packageDefinition = protoLoader.loadSync('../protos/subject.proto', {
   keepCase: true,
   longs: String,
   enums: String,

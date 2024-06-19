@@ -1,6 +1,5 @@
 import mysql from 'mysql2';
-import grpc from '@grpc/grpc-js';
-import protoLoader from '@grpc/proto-loader';
+import grpcClient from '../../protos_clients/course.js';
 
 const DEFAULT_CONFIG = {
     host: 'localhost',
@@ -20,15 +19,26 @@ db.connect(err => {
     console.log('Connected to subject database.');
 });
 
-const packageDefinition = protoLoader.loadSync('C:/Users/LauMez/OneDrive/Desktop/school-project/protos/course.proto', {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true
-});
-const courseservice = grpc.loadPackageDefinition(packageDefinition).courseservice;
-const grpcClient = new courseservice.CourseService('localhost:50053', grpc.credentials.createInsecure());
+async function getCourseDetails(courseID) {
+  return new Promise((resolve, reject) => {
+    const details = [];
+    const call = grpcClient.GetByID({ courseID });
+
+    call.on('data', (response) => {
+      details.push(response);
+    });
+
+    call.on('end', () => {
+      resolve(details);
+    });
+
+    call.on('error', (error) => {
+      console.error('Error calling gRPC GetByID:', error);
+      reject(new Error('gRPC call failed'));
+    });
+  });
+}
+
 export class SubjectModel {
     static async getAll () {
         try{
@@ -59,19 +69,14 @@ export class SubjectModel {
               };
 
               const courseID = subject.courseID;
-              console.log('courseID: ', courseID);
-              grpcClient.GetByID({courseID}, (error, subjects) => {
-                if (error) {
-                  console.error('Error calling gRPC getAll:', error);
-                  throw new Error('gRPC call failed');
-                }
-                console.log(subjects.responses);
-              });
+
+              const courseDetails = await getCourseDetails(courseID);
       
               return schedules.map(schedule => ({
                 name: subject.name,
                 day: schedule.day,
                 schedule: schedule.schedule,
+                courseDetails: courseDetails
               }));
             });
       
