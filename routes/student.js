@@ -7,10 +7,10 @@ export const createStudentRouter = ({ studentModel }) => {
   const studentController = new StudentController({ studentModel });
 
   studentRouter.get('/', studentController.getAll);
-  // studentRouter.post('/', studentController.create)
+  studentRouter.post('/', studentController.create);
 
   studentRouter.get('/:CUIL', studentController.getByID);
-  // studentRouter.delete('/:id', studentController.delete)
+  studentRouter.delete('/:CUIL', studentController.delete);
   // studentRouter.patch('/:id', studentController.update)
 
   return studentRouter;

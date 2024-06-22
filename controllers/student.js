@@ -1,3 +1,5 @@
+import { validateStudent } from "../schemas/student.js";
+
 export class StudentController {
   constructor ({ studentModel }) {
     this.studentModel = studentModel
@@ -31,30 +33,26 @@ export class StudentController {
     };
   };
 
-  // create = async (req, res) => {
-  //   const result = validateMovie(req.body)
+  create = async (req, res) => {
+    const result = validateStudent(req.body);
 
-  //   if (!result.success) {
-  //   // 422 Unprocessable Entity
-  //     return res.status(400).json({ error: JSON.parse(result.error.message) })
-  //   }
+    if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
+    
 
-  //   const newStudent = await this.studentModel.create({ input: result.data })
+    const newStudent = await this.studentModel.create({ input: result.data });
 
-  //   res.status(201).json(newStudent)
-  // }
+    res.status(201).json(newStudent);
+  }
 
-  // delete = async (req, res) => {
-  //   const { id } = req.params
+  delete = async (req, res) => {
+    const { CUIL } = req.params;
 
-  //   const result = await this.studentModel.delete({ id })
+    const result = await this.studentModel.delete({ CUIL });
 
-  //   if (result === false) {
-  //     return res.status(404).json({ message: 'Movie not found' })
-  //   }
-
-  //   return res.json({ message: 'Student deleted' })
-  // }
+    if (result === false) return res.status(404).json({ message: 'Student not found' });
+    
+    return res.json({ message: 'Student deleted' });
+  }
 
   // update = async (req, res) => {
   //   const result = validatePartialMovie(req.body)

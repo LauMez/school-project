@@ -108,4 +108,87 @@ export class StudentModel {
       throw new Error('Internal server error');
     };
   };
+
+  static async create ({input}) {
+    const {
+      CUIL,
+      DNI,
+      first_name,
+      second_name,
+      last_name1,
+      last_name2,
+      phone_number,
+      landline_phone_number,
+      direction,
+      blood_type,
+      social_work
+    } = input;
+
+    try {
+      await db.promise().execute('INSERT INTO Student (CUIL) VALUES (?);', [CUIL]);
+    } catch (e) {
+      console.log(e)
+      throw new Error('Error creating student: ');
+    }
+
+    try {
+      await db.promise().execute('INSERT INTO Personal_Information (CUIL, DNI, first_name, second_name, last_name1, last_name2, phone_number, landline_phone_number, direction) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);', [CUIL, DNI, first_name, second_name, last_name1, last_name2, phone_number, landline_phone_number, direction]);
+    } catch (e) {
+      console.log(e)
+      throw new Error('Error creating personal information');
+    }
+
+    try {
+      await db.promise().execute('INSERT INTO Student_Information (CUIL, blood_type, social_work) VALUES(?, ?, ?);', [CUIL, blood_type, social_work]);
+    }  catch (e) {
+      throw new Error('Error creating student information');
+    }
+
+    const [PersonalInformation] = await db.promise().execute('SELECT * FROM Personal_Information WHERE CUIL = ?', [CUIL]);
+    
+    const personalInformation = PersonalInformation[0];
+
+    const [StudentInformation] = await db.promise().execute('SELECT blood_type, social_work FROM Student_Information WHERE CUIL = ?', [CUIL]);
+
+    const studentInformation = StudentInformation[0];
+
+    return {
+      CUIL: personalInformation.CUIL,
+      DNI: personalInformation.DNI,
+      first_name: personalInformation.first_name,
+      second_name: personalInformation.second_name,
+      last_name1: personalInformation.last_name1,
+      last_name2: personalInformation.last_name2,
+      phone_number: personalInformation.phone_number,
+      landline_phone_number: personalInformation.landline_phone_number,
+      direction: personalInformation.direction,
+      blood_type: studentInformation.blood_type,
+      social_work: studentInformation.social_work
+    };
+  };
+
+  static async delete ({CUIL}) {
+    try {
+      await db.promise().execute('DELETE FROM Student_Information WHERE CUIL = ?', [CUIL]);
+    } catch (e) {
+      console.log(e);
+      throw new Error('Error deleting student information');
+    }
+
+    try {
+      await db.promise().execute('DELETE FROM Personal_Information WHERE CUIL = ?', [CUIL]);
+    } catch (e) {
+      console.log(e);
+      throw new Error('Error deleting personal information');
+    }
+    
+    try {
+      await db.promise().execute('DELETE FROM Student WHERE CUIL = ?', [CUIL]);
+    } catch (e) {
+      console.log(e);
+      throw new Error('Error deleting student');
+    }
+
+    return;
+  };
 };
