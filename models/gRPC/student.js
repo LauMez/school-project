@@ -191,4 +191,35 @@ export class StudentModel {
 
     return;
   };
+
+  static async update ({CUIL, input}) {
+    {
+      const {
+        DNI,
+        first_name,
+        second_name,
+        last_name1,
+        last_name2,
+        phone_number,
+        landline_phone_number,
+        direction,
+        blood_type,
+        social_work
+      } = input;
+
+      try {
+        await db.promise().execute('UPDATE Personal_Information SET DNI = ?, first_name = ?, second_name = ?, last_name1 = ?, last_name2 = ?, phone_number = ?, landline_phone_number = ?, direction = ? WHERE CUIL = ?', [DNI, first_name, second_name, last_name1, last_name2, phone_number, landline_phone_number, direction, CUIL]);
+      } catch(e) {
+        console.log(e);
+        throw new Error('Error updating personal information');
+      }
+
+      try {
+        await db.promise().execute('UPDATE Student_Information SET blood_type = ?, social_work = ? WHERE CUIL = ?', [blood_type, social_work, CUIL]);
+      } catch (e) {
+        console.log(e);
+        throw new Error('Error updating student information');
+      }
+    };
+  };
 };

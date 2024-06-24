@@ -11,7 +11,7 @@ export const createStudentRouter = ({ studentModel }) => {
 
   studentRouter.get('/:CUIL', studentController.getByID);
   studentRouter.delete('/:CUIL', studentController.delete);
-  // studentRouter.patch('/:id', studentController.update)
+  studentRouter.patch('/:CUIL', studentController.update);
 
   return studentRouter;
 };

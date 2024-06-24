@@ -1,4 +1,4 @@
-import { validateStudent } from "../schemas/student.js";
+import { validateStudent, validatePartialStudent } from "../schemas/student.js";
 
 export class StudentController {
   constructor ({ studentModel }) {
@@ -54,17 +54,15 @@ export class StudentController {
     return res.json({ message: 'Student deleted' });
   }
 
-  // update = async (req, res) => {
-  //   const result = validatePartialMovie(req.body)
+  update = async (req, res) => {
+    const result = validatePartialStudent(req.body);
 
-  //   if (!result.success) {
-  //     return res.status(400).json({ error: JSON.parse(result.error.message) })
-  //   }
+    if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
 
-  //   const { id } = req.params
+    const { CUIL } = req.params;
 
-  //   const updatedStudent = await this.studentModel.update({ id, input: result.data })
+    const updatedStudent = await this.studentModel.update({ CUIL, input: result.data });
 
-  //   return res.json(updatedStudent)
-  // }
+    return res.json({message: 'Student updating'});
+  }
 };
