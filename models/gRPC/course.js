@@ -108,8 +108,7 @@ export class CourseModel {
   static async create ({input}) {
     const {
       year,
-      division,
-      group
+      division
     } = input;
 
     const [uuidCourse] = await db.promise().execute('SELECT UUID() courseID;')
@@ -121,6 +120,28 @@ export class CourseModel {
       console.log(e)
       throw new Error('Error creating course: ');
     }
+
+    try {
+      const [Course] = await db.promise().execute(`SELECT year, division FROM Course WHERE courseID = UUID_TO_BIN("${courseID}")`);
+
+      const course = Course[0];
+
+      if (!course) {
+        console.error('Course not found with ID:', courseID);
+        return [];
+      };
+
+      return;
+    } catch (error) {
+      console.error('Error processing course:', error);
+      throw new Error('Internal server error');
+    };
+  };
+
+  static async createCourse ({courseID, input}) {
+    const {
+      group
+    } = input;
 
     const [uuidGroup] = await db.promise().execute('SELECT UUID() courseGroupID;');
     const [{ courseGroupID }] = uuidGroup;
@@ -169,59 +190,35 @@ export class CourseModel {
     };
   };
 
-  static async delete ({CUIL}) {
+  static async delete ({courseID}) {
     try {
-      await db.promise().execute('DELETE FROM Student_Information WHERE CUIL = ?', [CUIL]);
+      await db.promise().execute(`DELETE FROM Course_Group WHERE courseID = UUID_TO_BIN("${courseID}")`);
     } catch (e) {
       console.log(e);
-      throw new Error('Error deleting student information');
-    }
-
-    try {
-      await db.promise().execute('DELETE FROM Personal_Information WHERE CUIL = ?', [CUIL]);
-    } catch (e) {
-      console.log(e);
-      throw new Error('Error deleting personal information');
+      throw new Error('Error deleting course groups');
     }
     
     try {
-      await db.promise().execute('DELETE FROM Student WHERE CUIL = ?', [CUIL]);
+      await db.promise().execute(`DELETE FROM Course WHERE courseID = UUID_TO_BIN("${courseID}")`);
     } catch (e) {
       console.log(e);
-      throw new Error('Error deleting student');
+      throw new Error('Error deleting course');
     }
 
     return;
   };
 
-  static async update ({CUIL, input}) {
-    {
-      const {
-        DNI,
-        first_name,
-        second_name,
-        last_name1,
-        last_name2,
-        phone_number,
-        landline_phone_number,
-        direction,
-        blood_type,
-        social_work
-      } = input;
+  static async update ({courseID, input}) {
+    const {
+      year,
+      division
+    } = input;
 
-      try {
-        await db.promise().execute('UPDATE Personal_Information SET DNI = ?, first_name = ?, second_name = ?, last_name1 = ?, last_name2 = ?, phone_number = ?, landline_phone_number = ?, direction = ? WHERE CUIL = ?', [DNI, first_name, second_name, last_name1, last_name2, phone_number, landline_phone_number, direction, CUIL]);
-      } catch(e) {
-        console.log(e);
-        throw new Error('Error updating personal information');
-      }
-
-      try {
-        await db.promise().execute('UPDATE Student_Information SET blood_type = ?, social_work = ? WHERE CUIL = ?', [blood_type, social_work, CUIL]);
-      } catch (e) {
-        console.log(e);
-        throw new Error('Error updating student information');
-      }
-    };
+    try {
+      await db.promise().execute(`UPDATE Course SET year = ?, division = ? WHERE courseID = UUID_TO_BIN("${courseID}")`, [year, division]);
+    } catch(e) {
+      console.log(e);
+      throw new Error('Error updating course');
+    }
   };
 };

@@ -8,12 +8,19 @@ const courseSchema = z.object({
   division: z.number({
     invalid_type_error: 'Course division must be a number',
     required_error: 'Course division name is required'
-  }),
+  })
+});
+
+const courseGroupScheme = z.object({
   group: z.string({
     invalid_type_error: 'Course group must be a string',
     required_error: 'Course group name is required'
   })
-})
+});
+
+export function validateGroup (input) {
+  return courseGroupScheme.safeParse(input)
+}
 
 export function validateCourse (input) {
   return courseSchema.safeParse(input)

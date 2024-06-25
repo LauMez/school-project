@@ -1,4 +1,4 @@
-import { validateCourse, validatePartialCourse } from "../schemas/course.js";
+import { validateCourse, validatePartialCourse, validateGroup } from "../schemas/course.js";
 
 export class CourseController {
   constructor ({ courseModel }) {
@@ -38,30 +38,41 @@ export class CourseController {
 
     if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
     
-
     const newCourse = await this.courseModel.create({ input: result.data });
 
-    res.status(201).json(newCourse);
+    res.status(201).json({message: 'Course created'});
   }
+
+  createCourse = async (req, res) => {
+    const { courseID } = req.params;
+
+    const result = validateGroup(req.body);
+
+    if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
+
+    const newGroup = await this.courseModel.createCourse({ courseID, input: result.data });
+
+    res.status(201).json(newGroup);
+  };
 
   delete = async (req, res) => {
     const { courseID } = req.params;
 
-    const result = await this.courseModel.delete({ CUIL });
+    const result = await this.courseModel.delete({ courseID });
 
-    if (result === false) return res.status(404).json({ message: 'Student not found' });
+    if (result === false) return res.status(404).json({ message: 'Course not found' });
     
     return res.json({ message: 'Course deleted' });
   };
 
   update = async (req, res) => {
-    const result = validatePartialStudent(req.body);
+    const result = validatePartialCourse(req.body);
 
     if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
 
     const { courseID } = req.params;
 
-    const updatedCourse = await this.courseModel.update({ CUIL, input: result.data });
+    const updatedCourse = await this.courseModel.update({ courseID, input: result.data });
 
     return res.json({message: 'Course updating'});
   };

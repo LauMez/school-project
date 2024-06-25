@@ -8,6 +8,7 @@ export const createCourseRouter = ({ courseModel }) => {
 
   courseRouter.get('/', courseController.getAll);
   courseRouter.post('/', courseController.create);
+  courseRouter.post('/:courseID', courseController.createCourse);
 
   courseRouter.get('/:courseID', courseController.getByID);
   courseRouter.delete('/:courseID', courseController.delete);
