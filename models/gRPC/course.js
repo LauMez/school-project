@@ -29,39 +29,15 @@ export class CourseModel {
           });
         });
   
-        // if (courses.length === 0) {
-        //   return [];
-        // };
-  
-        // const coursePromises = courses.map(async (course) => {
-        //   const groups = await new Promise((resolve, reject) => {
-        //     db.query('SELECT courseGroup FROM Course_Group WHERE courseID = ?', [course.courseID], (err, groups) => {
-        //       if (err) reject(err);
-  
-        //       resolve(groups);
-        //     });
-        //   });
-  
-        //   if (!groups) {
-        //     console.error('Groups not found:');
-        //     return [];
-        //   };
-  
-        //   return groups.map(group => ({
-        //     // courseID: course.courseID,
-        //     year: course.year,
-        //     division: course.division,
-        //     group: group.courseGroup,
-        //   }));
-        // });
-  
-        // const courseObjects = await Promise.all(coursePromises);
-        // const flattenedCourseObjects = courseObjects.flat();
-        // const response = {
-        //   responses: flattenedCourseObjects
-        // };
-  
-        // return response;
+        if (!courses) {
+          console.error('Courses not found');
+          return [];
+        };
+    
+        return courses.map(course => ({
+          year: course.year,
+          division: course.division
+        }));
     } catch (error) {
         console.error('Error processing courses:', error);
         throw new Error('Internal server error');
@@ -104,6 +80,18 @@ export class CourseModel {
         return [];
       };
 
+      return {
+        year: course.year,
+        division: course.division
+      }
+    } catch (error) {
+      console.error('Error processing course:', error);
+      throw new Error('Internal server error');
+    };
+  };
+
+  static async getGroupsByID ({courseID}) {
+    try {
       const groups = await new Promise((resolve, reject) => {
         db.query(`SELECT courseGroup FROM Course_Group WHERE courseID = UUID_TO_BIN("${courseID}")`, (err, groups) => {
           if (err) reject(err);
@@ -111,24 +99,39 @@ export class CourseModel {
         });
       });
 
-      if (!groups) {
-        console.error('Groups not found with ID:', courseID);
-        return [];
-      };
-
       const groupsObjects = groups.map(group => {
         return {
-          year: course.year,
-          division: course.division,
           group: group.courseGroup
         };
       });
 
       return groupsObjects;
-    } catch (error) {
-      console.error('Error processing course:', error);
+    } catch(e) {
+      console.error('Error processing groups:', e);
       throw new Error('Internal server error');
-    };
+    }
+  }
+
+  static async getByGroupID ({courseID, courseGroupID}) {
+    try {
+      const groups = await new Promise((resolve, reject) => {
+        db.query(`SELECT courseGroup FROM Course_Group WHERE courseID = UUID_TO_BIN("${courseID}") AND courseGroupID = UUID_TO_BIN("${courseGroupID}")`, (err, groups) => {
+          if (err) reject(err);
+          resolve(groups);
+        });
+      });
+
+      const groupsObjects = groups.map(group => {
+        return {
+          group: group.courseGroup
+        };
+      });
+
+      return groupsObjects;
+    } catch (e) {
+      console.error('Error processing groups:', e);
+      throw new Error('Internal server error');
+    }
   };
 
   static async create ({input}) {

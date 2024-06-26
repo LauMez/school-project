@@ -46,6 +46,36 @@ export class CourseController {
     };
   };
 
+  getGroupsByID = async (req, res) => {
+    const { courseID } =  req.params;
+
+    try {
+      const groups = await this.courseModel.getGroupsByID({ courseID });
+
+      if(groups.length === 0) return res.status(404).json({message: 'Groups not found'});
+
+      return res.json(groups);
+    } catch(e) {
+      console.log(e);
+      return res.status(500).json({ nessage: 'Internal server error' });
+    }
+  };
+
+  getByGroupID = async (req, res) => {
+    const { courseID, courseGroupID } =  req.params;
+
+    try {
+      const groups = await this.courseModel.getByGroupID({ courseID, courseGroupID });
+
+      if(groups.length === 0) return res.status(404).json({message: 'Groups not found'});
+
+      return res.json(groups);
+    } catch(e) {
+      console.log(e);
+      return res.status(500).json({ nessage: 'Internal server error' });
+    }
+  };
+
   create = async (req, res) => {
     const result = validateCourse(req.body);
 
