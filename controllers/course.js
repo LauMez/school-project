@@ -1,4 +1,4 @@
-import { validateCourse, validatePartialCourse, validateGroup } from "../schemas/course.js";
+import { validateCourse, validatePartialCourse, validateGroup, validatePartialGroup } from "../schemas/course.js";
 
 export class CourseController {
   constructor ({ courseModel }) {
@@ -17,6 +17,19 @@ export class CourseController {
       return res.status(500).json({ message: 'Internal server error' });
     };
   };
+
+  getAllGroups = async (req, res) => {
+    try {
+      const groups = await this.courseModel.getAllGroups();
+
+      if (groups.length === 0) return res.status(404).json({ message: 'Groups not found' });
+
+      return res.json(groups);
+    } catch (error) {
+      console.error('Error occurred while fetching groups:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    };
+  }
 
   getByID = async (req, res) => {
     const { courseID } = req.params
@@ -43,14 +56,14 @@ export class CourseController {
     res.status(201).json({message: 'Course created'});
   }
 
-  createCourse = async (req, res) => {
+  createGroup = async (req, res) => {
     const { courseID } = req.params;
 
     const result = validateGroup(req.body);
 
     if (!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
 
-    const newGroup = await this.courseModel.createCourse({ courseID, input: result.data });
+    const newGroup = await this.courseModel.createGroup({ courseID, input: result.data });
 
     res.status(201).json(newGroup);
   };
@@ -65,6 +78,16 @@ export class CourseController {
     return res.json({ message: 'Course deleted' });
   };
 
+  deleteGroup = async (req, res) => {
+    const { courseID, courseGroupID } = req.params;
+
+    const result = await this.courseModel.deleteGroup({  courseID, courseGroupID });
+
+    if(result === false) return res.status(404).json({message: 'Group not found'});
+
+    return res.json({message: 'Group deleted'});
+  }
+
   update = async (req, res) => {
     const result = validatePartialCourse(req.body);
 
@@ -74,6 +97,18 @@ export class CourseController {
 
     const updatedCourse = await this.courseModel.update({ courseID, input: result.data });
 
-    return res.json({message: 'Course updating'});
+    return res.json({message: 'Course updated'});
   };
+
+  updateGroup = async (req, res) => {
+    const result = validatePartialGroup(req.body);
+
+    if(!result.success) return res.status(400).json({ error: JSON.parse(result.error.message) });
+
+    const { courseID, courseGroupID } = req.params;
+
+    const updateGroup = await this.courseModel.updateGroup({ courseID, courseGroupID, input: result.data });
+
+    return res.json({message: 'Group updated'})
+  }
 };

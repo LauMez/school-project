@@ -7,12 +7,20 @@ export const createCourseRouter = ({ courseModel }) => {
   const courseController = new CourseController({ courseModel });
 
   courseRouter.get('/', courseController.getAll);
-  courseRouter.post('/', courseController.create);
-  courseRouter.post('/:courseID', courseController.createCourse);
+  courseRouter.get('/groups', courseController.getAllGroups);
 
   courseRouter.get('/:courseID', courseController.getByID);
+  courseRouter.get('/:courseID/groups', courseController.getGroupsByID);
+  courseRouter.get('/:courseID/group/:courseGroupID', courseController.getByGroupID);
+
+  courseRouter.post('/', courseController.create);
+  courseRouter.post('/:courseID/group', courseController.createGroup);
+
   courseRouter.delete('/:courseID', courseController.delete);
+  courseRouter.delete('/:courseID/group/:courseGroupID', courseController.deleteGroup);
+
   courseRouter.patch('/:courseID', courseController.update);
+  courseRouter.patch('/:courseID/group/:courseGroupID', courseController.updateGroup);
 
   return courseRouter;
 }
